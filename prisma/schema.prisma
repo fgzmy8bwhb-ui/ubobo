@@ -1,0 +1,341 @@
+// UBOBO — Prisma schema
+// Default provider: SQLite (dev). For production swap "sqlite" -> "postgresql"
+// and update DATABASE_URL accordingly. The schema is intentionally written to
+// be portable across both engines (no native types, JSON stored as String).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// DEV  : provider = "sqlite"    DATABASE_URL="file:./prisma/dev.db"
+// PROD : provider = "postgresql" DATABASE_URL="postgresql://..."
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USERS
+// ============================================================
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String?
+  phone        String?
+  address      String?
+  locale       String   @default("fr")
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders     Order[]
+  reviews    Review[]
+  favorites  Favorite[]
+
+  @@index([email])
+}
+
+// ============================================================
+// RESTAURANTS
+// ============================================================
+
+enum RestaurantStatus {
+  ACTIVE
+  COMING_SOON
+  PARTNER_PENDING
+  PAUSED
+}
+
+enum RestaurantCategory {
+  FASTFOOD
+  PIZZA
+  FISH
+  SNACK
+  HEALTHY
+  DESSERT
+  ASIAN
+  GROCERY
+}
+
+model Restaurant {
+  id                    String             @id @default(cuid())
+  slug                  String             @unique
+  name                  String
+  category              RestaurantCategory
+  status                RestaurantStatus   @default(ACTIVE)
+  logo                  String?
+  coverImage            String?
+  description           String?
+  estimatedTimeMin      Int                @default(30)
+  distanceFromCenterKm  Float              @default(1)
+  address               String
+  phone                 String?
+  latitude              Float?
+  longitude             Float?
+  isFeatured            Boolean            @default(false)
+  averageRating         Float              @default(0)
+  reviewCount           Int                @default(0)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  menu       MenuItem[]
+  orders     Order[]
+  reviews    Review[]
+  favorites  Favorite[]
+  promotions Promotion[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([category])
+}
+
+model MenuItem {
+  id           String  @id @default(cuid())
+  restaurantId String
+  name         String
+  description  String  @default("")
+  price        Float
+  category     String  // free-form: "Sandwiches", "Burgers", ...
+  available    Boolean @default(true)
+  image        String?
+  /// JSON-encoded MenuItemOption[]: [{ name, choices: string[], required?: boolean }]
+  optionsJson  String?
+  position     Int     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([restaurantId])
+  @@index([category])
+}
+
+// ============================================================
+// ORDERS
+// ============================================================
+
+enum OrderStatus {
+  PENDING       // created, awaiting payment
+  PAID          // payment confirmed
+  ACCEPTED      // restaurant accepted
+  PREPARING     // being cooked
+  READY         // ready for pickup
+  ON_THE_WAY    // driver delivering
+  DELIVERED     // completed
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id                    String        @id @default(cuid())
+  orderNumber           String        @unique
+  userId                String?
+  restaurantId          String
+  status                OrderStatus   @default(PENDING)
+  subtotal              Float
+  deliveryFee           Float
+  total                 Float
+  discount              Float         @default(0)
+  promotionCode         String?
+
+  // Customer info (snapshot for guest orders)
+  customerName          String
+  customerPhone         String
+  customerEmail         String?
+  deliveryAddress       String
+  deliveryDistanceKm    Float
+
+  // Payment
+  paymentMethod         PaymentMethod
+  paymentStatus         PaymentStatus @default(PENDING)
+  stripePaymentIntentId String?
+
+  // Notes from customer
+  notes                 String?
+
+  estimatedDeliveryAt   DateTime?
+  acceptedAt            DateTime?
+  preparedAt            DateTime?
+  deliveredAt           DateTime?
+  cancelledAt           DateTime?
+
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  user        User?       @relation(fields: [userId], references: [id])
+  restaurant  Restaurant  @relation(fields: [restaurantId], references: [id])
+  items       OrderItem[]
+  reviews     Review[]
+
+  @@index([orderNumber])
+  @@index([restaurantId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id                  String  @id @default(cuid())
+  orderId             String
+  menuItemId          String?
+  // Snapshot fields (so price changes / item deletion don't affect history)
+  name                String
+  price               Float
+  quantity            Int
+  /// JSON-encoded Record<string, string>
+  selectedOptionsJson String?
+
+  order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem? @relation(fields: [menuItemId], references: [id])
+
+  @@index([orderId])
+}
+
+// ============================================================
+// REVIEWS & FAVORITES
+// ============================================================
+
+model Review {
+  id           String   @id @default(cuid())
+  userId       String
+  restaurantId String
+  orderId      String?
+  rating       Int      // 1-5
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  order      Order?     @relation(fields: [orderId], references: [id])
+
+  @@unique([userId, restaurantId, orderId])
+  @@index([restaurantId])
+}
+
+model Favorite {
+  id           String   @id @default(cuid())
+  userId       String
+  restaurantId String
+  createdAt    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, restaurantId])
+  @@index([userId])
+}
+
+// ============================================================
+// APP SETTINGS (singleton)
+// ============================================================
+// One row only — use id = "singleton"
+// Controls delivery pricing, currency, app name, etc.
+// Editable from /admin/settings without touching code.
+
+model AppSettings {
+  id                    String   @id @default("singleton")
+  appName               String   @default("UBOBO")
+  defaultLocale         String   @default("fr")
+  currency              String   @default("EUR")
+  currencySymbol        String   @default("€")
+
+  // Delivery fee config (flat-rate, used when no zone matches)
+  deliveryBaseFee       Float    @default(5.0)
+  deliveryPerKmFee      Float    @default(1.0)
+  deliveryFreeAbove     Float?   // free delivery when subtotal exceeds this
+  deliveryMinOrder      Float    @default(0)
+  deliveryMaxDistanceKm Float    @default(4)
+
+  // Service-level
+  serviceFeeRate        Float    @default(0)  // 0.05 = 5%
+  acceptingOrders       Boolean  @default(true)
+
+  // Notifications
+  notifyAdminOnNewOrder Boolean  @default(true)
+
+  updatedAt             DateTime @updatedAt
+}
+
+// ============================================================
+// DELIVERY ZONES (optional, future-proofing for per-zone fees)
+// ============================================================
+// If any zone matches, its fee overrides AppSettings flat-rate.
+// Future: add polygon / postalCodes array etc.
+
+model DeliveryZone {
+  id           String   @id @default(cuid())
+  name         String
+  postalCode   String?
+  baseFee      Float
+  perKmFee     Float
+  freeAbove    Float?
+  minOrder     Float    @default(0)
+  maxDistanceKm Float   @default(4)
+  isActive     Boolean  @default(true)
+  priority     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ============================================================
+// PROMOTIONS / BANNERS
+// ============================================================
+
+enum PromotionType {
+  PERCENT     // X % off
+  AMOUNT      // X € off
+  FREE_DELIVERY
+}
+
+model Promotion {
+  id            String        @id @default(cuid())
+  code          String        @unique
+  title         String
+  description   String?
+  type          PromotionType
+  value         Float         // % or amount
+  minSubtotal   Float         @default(0)
+  maxUses       Int?
+  uses          Int           @default(0)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  isActive      Boolean       @default(true)
+  restaurantId  String?       // null = applies to all restaurants
+  bannerImage   String?
+  bannerColor   String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  restaurant Restaurant? @relation(fields: [restaurantId], references: [id])
+}
+
+// ============================================================
+// WAITLIST (kept from MVP — pre-launch interest)
+// ============================================================
+
+model Waitlist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String?
+  createdAt DateTime @default(now())
+}
