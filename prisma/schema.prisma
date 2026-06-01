@@ -7,10 +7,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// DEV  : provider = "sqlite"    DATABASE_URL="file:./prisma/dev.db"
-// PROD : provider = "postgresql" DATABASE_URL="postgresql://..."
+// Pour le dev local, installe PostgreSQL ou pointe vers Neon dans .env
+// DATABASE_URL="postgresql://user:pass@host.neon.tech/ubobo?sslmode=require"
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

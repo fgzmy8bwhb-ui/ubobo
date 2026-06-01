@@ -1,40 +1,43 @@
-import { io, type Socket } from 'socket.io-client'
+// Polling-based fallback — replaces Socket.io for Vercel deployment.
+// Orders refresh every 5 s; admin dashboard every 5 s.
+const API_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:4000'
+const POLL_MS = 5000
 
-const SOCKET_URL = (import.meta.env.VITE_SOCKET_URL as string) || 'http://localhost:4000'
-
-let socket: Socket | null = null
-
-export function getSocket(): Socket {
-  if (!socket) {
-    socket = io(SOCKET_URL, {
-      autoConnect: true,
-      transports: ['websocket', 'polling'],
-      withCredentials: true,
-    })
-  }
-  return socket
+function authHeaders(): Record<string, string> {
+  const token = localStorage.getItem('token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-export function subscribeToOrder(orderNumber: string, onUpdate: (data: { status: string }) => void) {
-  const s = getSocket()
-  s.emit('order:subscribe', orderNumber)
-  const handler = (payload: { orderNumber: string; status: string }) => {
-    if (payload.orderNumber === orderNumber) onUpdate(payload)
-  }
-  s.on('order:updated', handler)
-  return () => {
-    s.emit('order:unsubscribe', orderNumber)
-    s.off('order:updated', handler)
-  }
+export function subscribeToOrder(
+  orderNumber: string,
+  onUpdate: (data: { status: string }) => void,
+) {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/orders/${orderNumber}`, {
+        headers: authHeaders(),
+      })
+      if (res.ok) {
+        const { order } = await res.json()
+        if (order?.status) onUpdate({ status: order.status })
+      }
+    } catch {
+      // ignore network errors during polling
+    }
+  }, POLL_MS)
+  return () => clearInterval(interval)
 }
 
-export function joinAdminRoom(onCreated: (o: { orderNumber: string }) => void, onUpdated: (o: { orderNumber: string; status: string }) => void) {
-  const s = getSocket()
-  s.emit('admin:join')
-  s.on('order:created', onCreated)
-  s.on('order:updated', onUpdated)
-  return () => {
-    s.off('order:created', onCreated)
-    s.off('order:updated', onUpdated)
-  }
+export function joinAdminRoom(
+  _onCreated: (o: { orderNumber: string }) => void,
+  onUpdated: (o: { orderNumber: string; status: string }) => void,
+) {
+  // Poll every 5 s — trigger onUpdated so AdminOrdersPage refreshes its list
+  const interval = setInterval(() => {
+    onUpdated({ orderNumber: '', status: '' })
+  }, POLL_MS)
+  return () => clearInterval(interval)
 }
+
+// No-op kept for compatibility (nothing imports getSocket in prod)
+export function getSocket() { return null as any }
