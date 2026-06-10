@@ -27,10 +27,10 @@ export default function Navbar() {
   }, [])
 
   const links = [
-    { to: '/categorie/petit-dejeuner', label: '🥐 Petit Déjeuner' },
-    { to: '/categorie/fruits-de-mer',  label: '🦞 Fruits de Mer' },
-    { to: '/categorie/huitres',        label: '🦪 Huîtres' },
-    { to: '/categorie/courses',        label: '🛒 Courses' },
+    { to: '/categorie/petit-dejeuner', label: 'Petit Déjeuner' },
+    { to: '/categorie/fruits-de-mer',  label: 'Fruits de Mer' },
+    { to: '/categorie/huitres',        label: 'Huîtres' },
+    { to: '/categorie/courses',        label: 'Courses' },
   ]
 
   return (

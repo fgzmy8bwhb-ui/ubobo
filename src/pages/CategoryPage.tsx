@@ -3,28 +3,24 @@ import { ArrowLeft, Clock, MapPin, Moon } from 'lucide-react'
 import { useRestaurants } from '@/hooks/useRestaurants'
 import type { Restaurant } from '@/types'
 
-const CATEGORY_META: Record<string, { name: string; emoji: string; gradient: string; description: string }> = {
+const CATEGORY_META: Record<string, { name: string; gradient: string; description: string }> = {
   'petit-dejeuner': {
     name: 'Petit Déjeuner',
-    emoji: '🥐',
     gradient: 'from-amber-400 to-orange-500',
     description: 'Viennoiseries & pâtisseries fraîches',
   },
   'fruits-de-mer': {
     name: 'Fruits de Mer',
-    emoji: '🦞',
     gradient: 'from-cyan-400 to-blue-500',
     description: 'Plateaux, huîtres et poissons frais du bassin',
   },
   'huitres': {
     name: 'Huîtres',
-    emoji: '🦪',
     gradient: 'from-slate-400 to-blue-600',
     description: 'Huîtres fraîches du bassin d\'Arcachon',
   },
   'courses': {
     name: 'Courses Arrivée',
-    emoji: '🛒',
     gradient: 'from-emerald-400 to-teal-500',
     description: 'Produits essentiels pour votre arrivée',
   },
@@ -58,7 +54,6 @@ export default function CategoryPage() {
             <ArrowLeft size={15} /> Retour
           </Link>
           <div className="flex items-center gap-4 mt-2">
-            <span className="text-6xl drop-shadow-md">{meta.emoji}</span>
             <div>
               <h1 className="text-3xl font-black text-white drop-shadow">{meta.name}</h1>
               <p className="mt-1 text-white/80">{meta.description}</p>

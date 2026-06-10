@@ -144,7 +144,7 @@ export default function CartDrawer() {
                       {t('cart.checkout')}
                     </button>
                   </Link>
-                  <p className="mt-2 text-center text-xs text-muted">Paiement sécurisé · Livraison 30–45 min</p>
+                  <p className="mt-2 text-center text-xs text-muted">Paiement sécurisé</p>
                 </div>
               </>
             )}

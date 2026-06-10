@@ -4,7 +4,6 @@ import AddressBar from '@/components/customer/AddressBar'
 
 interface CategoryTile {
   slug: string
-  emoji: string
   name: string
   description: string
   sub: string
@@ -13,12 +12,12 @@ interface CategoryTile {
   textAccent: string
   time: string
   comingSoon?: boolean
+  image: string
 }
 
 const TILES: CategoryTile[] = [
   {
     slug: 'petit-dejeuner',
-    emoji: '🥐',
     name: 'Petit Déjeuner',
     description: 'Viennoiseries & pâtisseries fraîches livrées le matin',
     sub: 'La Boulangerie du Cap',
@@ -26,10 +25,10 @@ const TILES: CategoryTile[] = [
     bgLight: 'bg-amber-50 dark:bg-amber-950/30',
     textAccent: 'text-amber-700 dark:text-amber-300',
     time: '20–30 min',
+    image: '/tiles/viennoiserie.webp',
   },
   {
     slug: 'fruits-de-mer',
-    emoji: '🦞',
     name: 'Fruits de Mer',
     description: 'Plateaux, huîtres et poissons frais du bassin d\'Arcachon',
     sub: 'Poissonnerie Lucine · La Kabane',
@@ -37,10 +36,10 @@ const TILES: CategoryTile[] = [
     bgLight: 'bg-cyan-50 dark:bg-cyan-950/30',
     textAccent: 'text-cyan-700 dark:text-cyan-300',
     time: '25–40 min',
+    image: '/tiles/fruits-de-mer.jpg',
   },
   {
     slug: 'huitres',
-    emoji: '🦪',
     name: 'Huîtres',
     description: 'Huîtres fraîches du bassin d\'Arcachon, élevées dans nos parcs',
     sub: 'La Kabane',
@@ -48,10 +47,10 @@ const TILES: CategoryTile[] = [
     bgLight: 'bg-slate-50 dark:bg-slate-950/30',
     textAccent: 'text-slate-700 dark:text-slate-300',
     time: '25–35 min',
+    image: '/tiles/huitres.jpg',
   },
   {
     slug: 'courses',
-    emoji: '🛒',
     name: 'Courses Arrivée',
     description: 'Produits essentiels livrés avant votre arrivée en location',
     sub: 'Bientôt disponible',
@@ -60,6 +59,7 @@ const TILES: CategoryTile[] = [
     textAccent: 'text-emerald-700 dark:text-emerald-300',
     time: 'Sur commande',
     comingSoon: true,
+    image: '/tiles/courses.jpg',
   },
 ]
 
@@ -122,11 +122,20 @@ export default function HomePage() {
 function CategoryTileCard({ tile }: { tile: CategoryTile }) {
   const inner = (
     <article className={`group relative flex flex-col overflow-hidden rounded-3xl border border-line bg-card transition-all duration-300 ${tile.comingSoon ? 'cursor-default' : 'hover:shadow-lift hover:-translate-y-0.5'}`}>
-      {/* Gradient header */}
-      <div className={`relative flex h-44 items-center justify-center bg-gradient-to-br ${tile.gradient}`}>
-        <span className="text-7xl select-none drop-shadow-md transition-transform duration-300 group-hover:scale-110">
-          {tile.emoji}
-        </span>
+      {/* Header avec image ou gradient */}
+      <div className={`relative flex h-44 items-center justify-center overflow-hidden ${!tile.image ? `bg-gradient-to-br ${tile.gradient}` : ''}`}>
+        {tile.image && (
+          <>
+            <img
+              src={tile.image}
+              alt={tile.name}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Overlay gradient pour lisibilité */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${tile.gradient} opacity-40 mix-blend-multiply`} />
+          </>
+        )}
+
         {tile.comingSoon && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
             <span className="rounded-full bg-white/95 px-5 py-2 text-sm font-bold text-ink shadow-card">
@@ -163,7 +172,6 @@ function CategoryTileCard({ tile }: { tile: CategoryTile }) {
         </div>
       </div>
 
-      {/* Cart indicator - bottom bar */}
       {!tile.comingSoon && (
         <div className={`h-1 w-full bg-gradient-to-r ${tile.gradient} opacity-70`} />
       )}
