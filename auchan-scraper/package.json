@@ -1,0 +1,22 @@
+{
+  "name": "auchan-scraper",
+  "version": "1.0.0",
+  "description": "Scraper Auchan vers CSV/JSON + PostgreSQL/Supabase",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "scrape": "node src/index.js scrape",
+    "import-db": "node src/index.js import-db",
+    "install-browsers": "playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0",
+    "dotenv": "^16.4.5",
+    "p-limit": "^3.1.0",
+    "cli-progress": "^3.12.0",
+    "json2csv": "^6.0.0-alpha.2",
+    "axios": "^1.7.7",
+    "pg": "^8.13.0",
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}

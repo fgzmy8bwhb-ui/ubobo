@@ -34,6 +34,10 @@ interface CartStore {
   lastOrder: LastOrder | null
   appliedPromo: AppliedPromo | null
   serverFee: number | null
+  deliverySlot: string | null
+  setDeliverySlot: (slot: string | null) => void
+  deliveryDate: string | null   // ISO date string "YYYY-MM-DD"
+  setDeliveryDate: (date: string | null) => void
 
   addItem: (item: MenuItem, restaurantId: string, restaurantName: string, selectedOptions?: Record<string, string>) => void
   removeItem: (itemId: string) => void
@@ -79,6 +83,10 @@ const useCartStore = create<CartStore>()(
       lastOrder: null,
       appliedPromo: null,
       serverFee: null,
+      deliverySlot: null,
+      setDeliverySlot: (slot) => set({ deliverySlot: slot }),
+      deliveryDate: null,
+      setDeliveryDate: (date) => set({ deliveryDate: date }),
 
       addItem: (item, restaurantId, restaurantName, selectedOptions) => {
         set((state) => {
@@ -189,7 +197,7 @@ const useCartStore = create<CartStore>()(
             paymentMethod: input.paymentMethod,
             address: input.deliveryAddress,
           },
-          items: [], restaurantId: null, restaurantName: null, isDrawerOpen: false, appliedPromo: null, serverFee: null,
+          items: [], restaurantId: null, restaurantName: null, isDrawerOpen: false, appliedPromo: null, serverFee: null, deliverySlot: null, deliveryDate: null,
         })
 
         return order
@@ -216,6 +224,8 @@ const useCartStore = create<CartStore>()(
         deliveryAddress: state.deliveryAddress,
         deliveryDistanceKm: state.deliveryDistanceKm,
         appliedPromo: state.appliedPromo,
+        deliverySlot: state.deliverySlot,
+        deliveryDate: state.deliveryDate,
       }),
     }
   )

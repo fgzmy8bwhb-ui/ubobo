@@ -18,7 +18,7 @@ export interface MenuItem {
 export interface Restaurant {
   id: string
   name: string
-  category: 'fastfood' | 'pizza' | 'fish' | 'snack' | 'healthy' | 'dessert'
+  category: 'petit-dejeuner' | 'fruits-de-mer' | 'huitres' | 'courses'
   logo?: string
   coverImage?: string
   estimatedTimeMin: number

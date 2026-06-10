@@ -11,7 +11,7 @@ function serializeRestaurant(r: any) {
     id: r.slug, // frontend uses slug as ID
     dbId: r.id,
     name: r.name,
-    category: r.category.toLowerCase(),
+    category: r.category.toLowerCase().replace('_', '-'),
     status:
       r.status === 'ACTIVE' ? 'active' :
       r.status === 'COMING_SOON' ? 'coming_soon' :
@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
   const { category, status, search } = req.query as Record<string, string | undefined>
 
   const where: any = {}
-  if (category) where.category = category.toUpperCase()
+  if (category) where.category = category.toUpperCase().replace('-', '_')
   if (status) where.status = status.toUpperCase()
   if (search) {
     where.OR = [
@@ -102,7 +102,7 @@ router.get('/:slug/reviews', async (req, res) => {
 const upsertRestaurantSchema = z.object({
   slug: z.string().min(1),
   name: z.string().min(1),
-  category: z.enum(['FASTFOOD', 'PIZZA', 'FISH', 'SNACK', 'HEALTHY', 'DESSERT', 'ASIAN', 'GROCERY']),
+  category: z.enum(['PETIT_DEJEUNER', 'FRUITS_DE_MER', 'HUITRES', 'COURSES']),
   status: z.enum(['ACTIVE', 'COMING_SOON', 'PARTNER_PENDING', 'PAUSED']),
   description: z.string().optional(),
   logo: z.string().optional(),

@@ -1,173 +1,119 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { Banknote, CheckCircle2, CreditCard, ShoppingBasket, Sparkles } from 'lucide-react'
-import Button from '@/components/ui/Button'
-import { cn } from '@/lib/cn'
+import { Link } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 
-const SUGGESTIONS = [
-  { label: 'Fruits & Légumes', items: 'pommes, salade, tomates' },
-  { label: 'Boulangerie', items: 'baguette, croissants' },
-  { label: 'Boissons & Apéro', items: 'rosé, chips, olives' },
-  { label: 'Viandes & Poissons', items: 'poulet, saumon, jambon' },
-  { label: 'Produits frais', items: 'lait, beurre, fromage' },
-  { label: 'Épicerie', items: 'pâtes, riz, conserves' },
+interface GroceryCategory {
+  slug: string
+  label: string
+  image: string
+  available: boolean
+}
+
+const CATEGORIES: GroceryCategory[] = [
+  { slug: 'halles',          label: 'Les halles',                         image: '/categories/halles.jpeg',          available: true },
+  { slug: 'fruits-legumes',  label: 'Fruits, légumes',                    image: '/categories/fruits-legumes.jpeg',  available: false },
+  { slug: 'charcuterie',     label: 'Charcuterie, traiteur',              image: '/categories/charcuterie.jpeg',     available: false },
+  { slug: 'surgeles',        label: 'Surgelés',                           image: '/categories/surgeles.jpeg',        available: false },
+  { slug: 'epicerie-salee',  label: 'Épicerie salée',                     image: '/categories/epicerie-salee.jpeg',  available: false },
+  { slug: 'vins-bieres',     label: 'Vins, bières, alcools',              image: '/categories/vins-bieres.jpeg',     available: false },
+  { slug: 'entretien',       label: 'Entretien, maison',                  image: '/categories/entretien.jpeg',       available: false },
+  { slug: 'produits-frais',  label: 'Produits laitiers, œufs, fromages',  image: '/categories/produits-frais.jpeg',  available: false },
+  { slug: 'boucherie',       label: 'Boucherie, volaille, poissonnerie',  image: '/categories/boucherie.jpeg',       available: false },
+  { slug: 'boulangerie',     label: 'Pain, pâtisserie',                   image: '/categories/boulangerie.jpeg',     available: false },
+  { slug: 'epicerie-sucree', label: 'Épicerie sucrée',                    image: '/categories/epicerie-sucree.jpeg', available: false },
+  { slug: 'boissons',        label: 'Eaux, jus, soda, thés glacés',       image: '/categories/boissons.jpeg',        available: false },
+  { slug: 'hygiene',         label: 'Hygiène, beauté',                    image: '/categories/hygiene.jpeg',         available: false },
+  { slug: 'bebe',            label: 'Tout pour bébé',                     image: '/categories/bebe.jpeg',            available: false },
+  { slug: 'pharmacie',       label: 'Parapharmacie',                      image: '/categories/pharmacie.jpeg',       available: false },
+  { slug: 'animalerie',      label: 'Animalerie',                         image: '/categories/animalerie.jpeg',      available: false },
+  { slug: 'puericulture',    label: 'Puériculture',                       image: '/categories/puericulture.jpeg',    available: false },
+  { slug: 'monde',           label: 'Produits du monde',                  image: '/categories/monde.jpeg',           available: false },
+  { slug: 'regions',         label: 'Produits de nos régions',            image: '/categories/regions.jpeg',         available: false },
+  { slug: 'bio',             label: 'Bio et nutrition',                   image: '/categories/bio.jpeg',             available: false },
+  { slug: 'electromenager',  label: 'Électroménager, cuisine',            image: '/categories/electromenager.jpeg',  available: false },
+  { slug: 'high-tech',       label: 'High-tech, téléphonie',              image: '/categories/high-tech.jpeg',       available: false },
+  { slug: 'jardin',          label: 'Jardin, auto, brico',                image: '/categories/jardin.jpeg',          available: false },
+  { slug: 'jouets',          label: 'Jouets, jeux vidéo, loisirs',        image: '/categories/jouets.jpeg',          available: false },
+  { slug: 'meuble',          label: 'Meuble, linge de maison',            image: '/categories/meuble.jpeg',          available: false },
+  { slug: 'mode',            label: 'Mode, bijoux, bagagerie',            image: '/categories/mode.jpeg',            available: false },
+  { slug: 'billetterie',     label: 'Billetterie, traiteur, voyage',      image: '/categories/billetterie.jpeg',     available: false },
+  { slug: 'promos',          label: 'Promos maison & loisirs',            image: '/categories/promos.jpeg',          available: false },
 ]
 
-const FLAT_FEE = 40
-
 export default function CoursesPage() {
-  const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
-  const [list, setList] = useState('')
-  const [address, setAddress] = useState('')
-  const [phone, setPhone] = useState('')
-  const [payment, setPayment] = useState<'card' | 'cash'>('card')
-  const [confirmed, setConfirmed] = useState(false)
-
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!list.trim() || !address.trim() || !phone.trim()) return
-    const store = (() => {
-      try { return JSON.parse(localStorage.getItem('ubobo_courses') ?? '[]') } catch { return [] }
-    })()
-    store.unshift({ list, address, phone, payment, date: new Date().toISOString() })
-    localStorage.setItem('ubobo_courses', JSON.stringify(store.slice(0, 500)))
-    setConfirmed(true)
-  }
-
-  function addSuggestion(label: string, items: string) {
-    setList((cur) => (cur ? cur + `\n` : '') + `${label}: ${items}`)
-  }
-
-  if (confirmed) {
-    return (
-      <main className="container-edge py-24 text-center">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 text-white">
-          <CheckCircle2 size={36} />
+  return (
+    <main className="pb-16">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-emerald-400 to-teal-500 px-4 pt-6 pb-8">
+        <div className="mx-auto max-w-3xl">
+          <Link to="/" className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
+            <ArrowLeft size={15} /> Retour
+          </Link>
+          <div className="flex items-center gap-4 mt-2">
+            <span className="text-6xl drop-shadow-md">🛒</span>
+            <div>
+              <h1 className="text-3xl font-black text-white drop-shadow">Courses Arrivée</h1>
+              <p className="mt-1 text-white/80">On fait vos courses à l'Auchan de Lège · livré chez vous</p>
+            </div>
+          </div>
         </div>
-        <h1 className="mt-6 text-display">Liste reçue !</h1>
-        <p className="mt-2 max-w-md mx-auto text-muted">
-          Notre équipe va vous appeler dans les 15 minutes au {phone} pour confirmer.
-        </p>
-        <Button variant="dark" className="mt-6" onClick={() => navigate('/')}>Retour à l'accueil</Button>
-      </main>
-    )
-  }
+      </div>
+
+      {/* Info banner */}
+      <div className="container-edge pt-6">
+        <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 dark:border-emerald-800/40 dark:bg-emerald-950/20">
+          <span className="text-xl">ℹ️</span>
+          <div>
+            <p className="font-bold text-emerald-800 dark:text-emerald-200">Service en cours de construction</p>
+            <p className="mt-0.5 text-sm text-emerald-700 dark:text-emerald-300">
+              Les catégories et produits sont ajoutés progressivement. Revenez bientôt !
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Categories grid */}
+      <section className="container-edge pt-6">
+        <h2 className="mb-5 text-display">Nos rayons</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {CATEGORIES.map((cat) => (
+            <CategoryCard key={cat.slug} cat={cat} />
+          ))}
+        </div>
+      </section>
+    </main>
+  )
+}
+
+function CategoryCard({ cat }: { cat: GroceryCategory }) {
+  const inner = (
+    <div className={`group relative flex flex-col items-center gap-3 rounded-2xl border border-line p-4 text-center transition-all duration-200 ${cat.available ? 'hover:shadow-md hover:-translate-y-0.5 cursor-pointer bg-card' : 'cursor-default bg-card opacity-60'}`}>
+      {/* Photo */}
+      <div className={`h-16 w-16 overflow-hidden rounded-2xl transition-transform duration-200 ${cat.available ? 'group-hover:scale-105' : ''}`}>
+        <img
+          src={cat.image}
+          alt={cat.label}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      </div>
+
+      {/* Label */}
+      <p className="text-xs font-semibold leading-tight text-ink line-clamp-2">{cat.label}</p>
+
+      {/* Coming soon badge */}
+      {!cat.available && (
+        <span className="absolute top-2 right-2 rounded-full bg-surface-alt px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted">
+          Bientôt
+        </span>
+      )}
+    </div>
+  )
+
+  if (!cat.available) return inner
 
   return (
-    <main className="container-edge py-8">
-      <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-        <Sparkles size={12} /> Service courses
-      </div>
-      <h1 className="text-display">Faites vos courses</h1>
-      <p className="mt-1 text-sm text-muted max-w-xl">
-        On fait vos courses dans les commerces du Cap Ferret et on vous livre. Frais de service fixe : {FLAT_FEE.toLocaleString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { style: 'currency', currency: 'EUR' })}
-      </p>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="card-surface p-5 sm:p-6">
-            <label className="block text-sm font-bold">Votre liste de courses</label>
-            <p className="mt-0.5 text-xs text-muted">Écrivez librement ce que vous voulez. On adapte.</p>
-            <textarea
-              value={list}
-              onChange={(e) => setList(e.target.value)}
-              rows={8}
-              required
-              placeholder="Ex:&#10;- 1 baguette tradition&#10;- 6 yaourts nature&#10;- 1 bouteille de rosé bien frais"
-              className="input-flat mt-3 font-mono text-sm"
-            />
-
-            <div className="mt-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted">Suggestions</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s.label}
-                    type="button"
-                    onClick={() => addSuggestion(s.label, s.items)}
-                    className="pill-default text-xs"
-                  >
-                    <ShoppingBasket size={12} /> {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="card-surface p-5 sm:p-6">
-            <h2 className="text-lg font-bold">Livraison & contact</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Adresse" className="input-flat sm:col-span-2" />
-              <input required value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="Téléphone" className="input-flat sm:col-span-2" />
-            </div>
-          </div>
-
-          <div className="card-surface p-5 sm:p-6">
-            <h2 className="text-lg font-bold">{t('checkout.payment')}</h2>
-            <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setPayment('card')}
-                className={cn(
-                  'flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all',
-                  payment === 'card' ? 'border-ink bg-surface-alt' : 'border-line bg-card hover:border-ink/30'
-                )}
-              >
-                <CreditCard size={22} className="text-ocean-500" />
-                <div>
-                  <p className="font-bold">{t('checkout.card')}</p>
-                  <p className="text-xs text-muted">Au moment de la livraison</p>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPayment('cash')}
-                className={cn(
-                  'flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all',
-                  payment === 'cash' ? 'border-ink bg-surface-alt' : 'border-line bg-card hover:border-ink/30'
-                )}
-              >
-                <Banknote size={22} className="text-emerald-500" />
-                <div>
-                  <p className="font-bold">{t('checkout.cash')}</p>
-                  <p className="text-xs text-muted">Au livreur</p>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <Button type="submit" variant="dark" size="lg" fullWidth disabled={!list.trim() || !address.trim() || !phone.trim()}>
-            Envoyer ma liste
-          </Button>
-        </form>
-
-        <aside className="lg:sticky lg:top-24 h-fit card-surface p-6">
-          <h2 className="text-lg font-bold">Comment ça marche</h2>
-          <ol className="mt-4 space-y-3 text-sm">
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-surface">1</span>
-              <span>Vous écrivez votre liste librement.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-surface">2</span>
-              <span>On vous appelle dans les 15 minutes pour valider et estimer le total.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-surface">3</span>
-              <span>On fait vos courses et on vous livre.</span>
-            </li>
-          </ol>
-          <div className="mt-6 rounded-2xl bg-surface-alt p-4">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted">Frais de service</p>
-            <p className="mt-1 text-xl font-bold">
-              {FLAT_FEE.toLocaleString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { style: 'currency', currency: 'EUR' })}
-            </p>
-            <p className="mt-0.5 text-xs text-muted">Hors prix des produits</p>
-          </div>
-        </aside>
-      </div>
-    </main>
+    <Link to={`/courses/categorie/${cat.slug}`} className="block">
+      {inner}
+    </Link>
   )
 }

@@ -5,21 +5,17 @@ import FavoriteButton from '@/components/customer/FavoriteButton'
 import { cn } from '@/lib/cn'
 
 export const categoryLabels: Record<Restaurant['category'], string> = {
-  fastfood: 'Fast-food',
-  pizza: 'Pizza',
-  fish: 'Poisson',
-  snack: 'Snack',
-  healthy: 'Healthy',
-  dessert: 'Desserts',
+  'petit-dejeuner': 'Petit Déjeuner',
+  'fruits-de-mer': 'Fruits de Mer',
+  'huitres': 'Huîtres',
+  'courses': 'Courses',
 }
 
 const categoryGradients: Record<Restaurant['category'], string> = {
-  fastfood: 'from-amber-400/30 to-orange-500/30',
-  pizza: 'from-red-400/30 to-rose-500/30',
-  fish: 'from-cyan-400/30 to-ocean-500/30',
-  snack: 'from-orange-400/30 to-amber-500/30',
-  healthy: 'from-emerald-400/30 to-teal-500/30',
-  dessert: 'from-pink-400/30 to-rose-400/30',
+  'petit-dejeuner': 'from-amber-400/30 to-orange-500/30',
+  'fruits-de-mer': 'from-cyan-400/30 to-blue-500/30',
+  'huitres': 'from-slate-400/30 to-blue-600/30',
+  'courses': 'from-emerald-400/30 to-teal-500/30',
 }
 
 function RestaurantVisual({ restaurant }: { restaurant: Restaurant }) {

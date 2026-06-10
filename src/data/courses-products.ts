@@ -1,0 +1,162 @@
+export interface CourseProduct {
+  id: string
+  name: string
+  brand?: string
+  weight: string
+  pieces?: string
+  pricePerKg?: string
+  price: number
+  image: string
+  isFresh?: boolean
+  tags?: string[]
+}
+
+type ProductMap = Record<string, Record<string, CourseProduct[]>>
+
+export const COURSES_PRODUCTS: ProductMap = {
+  halles: {
+    boucher: [
+      {
+        id: 'bch-01',
+        brand: 'MON BOUCHER',
+        name: 'Steak de boeuf à griller',
+        weight: '150g',
+        pieces: '1 pièce',
+        pricePerKg: '21,93€/kg',
+        price: 3.29,
+        image: '/categories/halles/boucher/01.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-02',
+        brand: 'CHARAL',
+        name: 'Carpaccio parmesan',
+        weight: '230g',
+        pieces: '2 parts',
+        pricePerKg: '31,52€/kg',
+        price: 7.25,
+        image: '/categories/halles/boucher/02.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-03',
+        name: 'Faux filets de boeuf',
+        weight: '260g',
+        pieces: '2 pièces',
+        pricePerKg: '29,23€/kg',
+        price: 7.60,
+        image: '/categories/halles/boucher/03.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-04',
+        name: 'Bourguignon de boeuf',
+        weight: '600g',
+        pieces: '3 parts',
+        pricePerKg: '18,17€/kg',
+        price: 10.90,
+        image: '/categories/halles/boucher/04.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-05',
+        name: 'Rôti de boeuf',
+        weight: '800g',
+        pieces: '4 parts',
+        pricePerKg: '24,63€/kg',
+        price: 19.70,
+        image: '/categories/halles/boucher/05.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-06',
+        name: 'Pavés tournedos de boeuf Charolais',
+        weight: '340g',
+        pieces: '2 pièces',
+        pricePerKg: '27,94€/kg',
+        price: 9.50,
+        image: '/categories/halles/boucher/06.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-07',
+        name: 'Entrecôte de boeuf',
+        weight: '380g',
+        pieces: '2 pièces',
+        pricePerKg: '35,53€/kg',
+        price: 13.50,
+        image: '/categories/halles/boucher/07.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-08',
+        name: 'Pièce à brochette',
+        weight: '500g',
+        pieces: '3 parts',
+        pricePerKg: '26,40€/kg',
+        price: 13.20,
+        image: '/categories/halles/boucher/08.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-09',
+        name: 'Steaks de boeuf',
+        weight: '260g',
+        pieces: '2 pièces',
+        pricePerKg: '25,00€/kg',
+        price: 6.50,
+        image: '/categories/halles/boucher/09.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-10',
+        brand: 'CHARAL',
+        name: 'Carpaccio basilic',
+        weight: '230g',
+        pieces: '2 parts',
+        pricePerKg: '31,52€/kg',
+        price: 7.25,
+        image: '/categories/halles/boucher/10.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-11',
+        name: "Bavettes d'Aloyau de boeuf",
+        weight: '280g',
+        pieces: '2 pièces',
+        pricePerKg: '34,29€/kg',
+        price: 9.60,
+        image: '/categories/halles/boucher/11.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+      {
+        id: 'bch-12',
+        name: 'Pavé de Rumsteak de boeuf',
+        weight: '280g',
+        pieces: '2 pièces',
+        pricePerKg: '28,21€/kg',
+        price: 7.90,
+        image: '/categories/halles/boucher/12.jpeg',
+        isFresh: true,
+        tags: ['Boeuf'],
+      },
+    ],
+    boulanger:   [],
+    charcutier:  [],
+    fromager:    [],
+    poissonnier: [],
+    primeur:     [],
+    traiteur:    [],
+  },
+}

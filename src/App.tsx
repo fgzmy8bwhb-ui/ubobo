@@ -4,9 +4,12 @@ import { motion } from 'framer-motion'
 import { Layout } from './components/layout'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
+const CategoryPage = lazy(() => import('./pages/CategoryPage'))
 const RestaurantsPage = lazy(() => import('./pages/RestaurantsPage'))
 const RestaurantDetailPage = lazy(() => import('./pages/RestaurantDetailPage'))
 const CoursesPage = lazy(() => import('./pages/CoursesPage'))
+const CoursesCategoryPage = lazy(() => import('./pages/CoursesCategoryPage'))
+const CoursesProductPage = lazy(() => import('./pages/CoursesProductPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
 const ConfirmationPage = lazy(() => import('./pages/ConfirmationPage'))
@@ -34,9 +37,12 @@ function AnimatedRoutes() {
     <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/categorie/:slug" element={<CategoryPage />} />
         <Route path="/restaurants" element={<RestaurantsPage />} />
         <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
         <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/courses/categorie/:slug" element={<CoursesCategoryPage />} />
+        <Route path="/courses/categorie/:category/:subcategory" element={<CoursesProductPage />} />
         <Route path="/recherche" element={<SearchPage />} />
         <Route path="/favoris" element={<FavoritesPage />} />
         <Route path="/panier" element={<CartPage />} />

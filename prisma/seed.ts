@@ -18,14 +18,12 @@ const prisma = new PrismaClient()
 
 function mapCategory(c: string): RestaurantCategory {
   const map: Record<string, RestaurantCategory> = {
-    fastfood: 'FASTFOOD',
-    pizza: 'PIZZA',
-    fish: 'FISH',
-    snack: 'SNACK',
-    healthy: 'HEALTHY',
-    dessert: 'DESSERT',
+    'petit-dejeuner': 'PETIT_DEJEUNER',
+    'fruits-de-mer':  'FRUITS_DE_MER',
+    'huitres':        'HUITRES',
+    'courses':        'COURSES',
   }
-  return map[c] ?? 'SNACK'
+  return map[c] ?? 'PETIT_DEJEUNER'
 }
 
 function mapStatus(s: string): RestaurantStatus {
@@ -95,7 +93,7 @@ async function main() {
         distanceFromCenterKm: r.distanceFromCenterKm,
         address: r.address,
         phone: r.phone ?? null,
-        isFeatured: r.id === 'chez-nounours',
+        isFeatured: r.id === 'boulangerie-du-cap',
       },
       update: {
         name: r.name,
