@@ -9,8 +9,7 @@
     "isolatedModules": true,
     "strict": true,
     "skipLibCheck": true,
-    "ignoreDeprecations": "6.0",
-    "outDir": "dist-server",
+"outDir": "dist-server",
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {

@@ -28,6 +28,7 @@ const AdminRestaurantsPage = lazy(() => import('./pages/admin/AdminRestaurantsPa
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage'))
 const AdminPromotionsPage = lazy(() => import('./pages/admin/AdminPromotionsPage'))
 const AdminWaitlistPage = lazy(() => import('./pages/admin/AdminWaitlistPage'))
+const AdminAuchanPage = lazy(() => import('./pages/admin/AdminAuchanPage'))
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -61,6 +62,7 @@ function AnimatedRoutes() {
           <Route path="restaurants" element={<AdminRestaurantsPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
           <Route path="promotions" element={<AdminPromotionsPage />} />
+          <Route path="auchan" element={<AdminAuchanPage />} />
           <Route path="waitlist" element={<AdminWaitlistPage />} />
         </Route>
       </Routes>

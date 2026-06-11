@@ -15,6 +15,7 @@ export default function CartDrawer() {
   const updateQuantity = useCartStore((s) => s.updateQuantity)
   const subtotal = useCartStore((s) => s.subtotal())
   const deliveryFee = useCartStore((s) => s.deliveryFee())
+  const pickingFee = useCartStore((s) => s.pickingFee())
   const discount = useCartStore((s) => s.discount())
   const total = useCartStore((s) => s.total())
   const appliedPromo = useCartStore((s) => s.appliedPromo)
@@ -130,8 +131,12 @@ export default function CartDrawer() {
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <dt className="text-muted">{t('cart.delivery')}</dt>
+                      <dt className="text-muted">Livraison (trajet)</dt>
                       <dd className="font-semibold">{formatPrice(deliveryFee, i18n.language)}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-muted">Préparation <span className="text-[10px]">(10 %)</span></dt>
+                      <dd className="font-semibold">{formatPrice(pickingFee, i18n.language)}</dd>
                     </div>
                     <div className="flex justify-between border-t border-line pt-2 text-base">
                       <dt className="font-bold">{t('cart.total')}</dt>

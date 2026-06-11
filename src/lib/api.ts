@@ -144,6 +144,8 @@ export const api = {
 
   admin: {
     stats: () => request<AdminStats>('/api/admin/stats'),
+    auchanScrape: () => request<{ message: string }>('/api/admin/auchan/scrape', { method: 'POST' }),
+    auchanProductCount: () => request<{ total: number; withPrice: number }>('/api/admin/auchan/products?limit=1'),
   },
 
   stripe: {

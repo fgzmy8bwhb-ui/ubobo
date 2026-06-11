@@ -83,7 +83,7 @@ export default function RestaurantsPage() {
           <>
             <div className="grid gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
               {active.map((r) => (
-                <RestaurantCard key={r.id} restaurant={r as Restaurant} />
+                <RestaurantCard key={r.id} restaurant={r as unknown as Restaurant} />
               ))}
             </div>
             {others.length > 0 && (
@@ -91,7 +91,7 @@ export default function RestaurantsPage() {
                 <h2 className="text-sm font-bold uppercase tracking-wider text-muted">Bientôt</h2>
                 <div className="mt-4 grid gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
                   {others.map((r) => (
-                    <RestaurantCard key={r.id} restaurant={r as Restaurant} />
+                    <RestaurantCard key={r.id} restaurant={r as unknown as Restaurant} />
                   ))}
                 </div>
               </div>

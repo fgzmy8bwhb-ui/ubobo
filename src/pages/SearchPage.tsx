@@ -92,7 +92,7 @@ export default function SearchPage() {
           </p>
         ) : (
           <div className="grid gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map((r) => <RestaurantCard key={r.id} restaurant={r as Restaurant} />)}
+            {results.map((r) => <RestaurantCard key={r.id} restaurant={r as unknown as Restaurant} />)}
           </div>
         )}
       </section>

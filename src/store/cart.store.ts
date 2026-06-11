@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { CartItem, MenuItem } from '@/types'
-import { calculateDeliveryFee } from '@/lib/delivery'
+import { calculateDeliveryFee, calculatePickingFee } from '@/lib/delivery'
 import { api, type ApiOrder } from '@/lib/api'
 
 export type PaymentMethod = 'card' | 'cash'
@@ -66,6 +66,7 @@ interface CartStore {
 
   subtotal: () => number
   deliveryFee: () => number
+  pickingFee: () => number
   discount: () => number
   total: () => number
   totalItems: () => number
@@ -207,11 +208,11 @@ const useCartStore = create<CartStore>()(
       deliveryFee: () => {
         const s = get()
         if (s.appliedPromo?.freeDelivery) return 0
-        if (s.serverFee != null) return s.serverFee
-        return calculateDeliveryFee(s.deliveryDistanceKm)
+        return calculateDeliveryFee()
       },
+      pickingFee: () => calculatePickingFee(get().subtotal()),
       discount: () => get().appliedPromo?.discount ?? 0,
-      total: () => Math.max(0, get().subtotal() + get().deliveryFee() - get().discount()),
+      total: () => Math.max(0, get().subtotal() + get().deliveryFee() + get().pickingFee() - get().discount()),
       totalItems: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
     }),
     {

@@ -7,6 +7,7 @@ import { app } from './app'
 import { env, IS_DEV } from './lib/env'
 import { initSocket } from './lib/socket'
 import { ensureAdminAccount } from './lib/auth'
+import { startAuchanCron } from './lib/auchan/cron'
 
 // Serve React frontend in production (non-Vercel, e.g. Render/Railway)
 if (!IS_DEV) {
@@ -34,7 +35,9 @@ async function start() {
     console.log(`\n  🦞 UBOBO API ready`)
     console.log(`  ➜  REST    http://localhost:${env.PORT}/api`)
     console.log(`  ➜  Socket  ws://localhost:${env.PORT}`)
-    console.log(`  ➜  Env     ${env.NODE_ENV}\n`)
+    console.log(`  ➜  Env     ${env.NODE_ENV}`)
+    startAuchanCron()
+    console.log()
   })
 }
 

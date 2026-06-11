@@ -333,3 +333,39 @@ model Waitlist {
   source    String?
   createdAt DateTime @default(now())
 }
+
+// ============================================================
+// AUCHAN CATEGORIES (synced from Auchan nav nightly)
+// ============================================================
+
+model AuchanCategory {
+  slug      String   @id              // e.g. "fruits-legumes"
+  name      String                    // e.g. "Fruits, légumes"
+  auchanUrl String                    // e.g. "https://www.auchan.fr/fruits-legumes/ca-n03"
+  iconUrl   String?                   // CDN icon from Auchan nav
+  group     String?                   // "Mes courses", "Maison & Loisirs", etc.
+  scrapedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// AUCHAN PRODUCTS (synced nightly via scraper cron)
+// ============================================================
+
+model AuchanProduct {
+  productId    String   @id
+  name         String
+  brand        String?
+  price        Float?
+  currency     String   @default("EUR")
+  weightVolume String?
+  packSize     String?
+  ean          String?
+  category     String?
+  description  String?
+  imageUrl     String?  // Cloudflare R2 public URL
+  sourceUrl    String?  // original auchan.fr URL
+  disabled     Boolean  @default(false) // true = exclu du scrape + masqué en front
+  scrapedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

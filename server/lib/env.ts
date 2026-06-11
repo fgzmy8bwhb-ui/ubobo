@@ -19,6 +19,11 @@ export const env = {
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? 'admin123',
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? '',
+  CF_ACCOUNT_ID: process.env.CF_ACCOUNT_ID ?? '',
+  CF_R2_ACCESS_KEY_ID: process.env.CF_R2_ACCESS_KEY_ID ?? '',
+  CF_R2_SECRET_ACCESS_KEY: process.env.CF_R2_SECRET_ACCESS_KEY ?? '',
+  CF_R2_BUCKET: process.env.CF_R2_BUCKET ?? 'ubobo-images',
+  CF_R2_PUBLIC_URL: process.env.CF_R2_PUBLIC_URL ?? '',
 }
 
 export const IS_DEV = env.NODE_ENV !== 'production'

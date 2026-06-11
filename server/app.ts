@@ -15,6 +15,8 @@ import promotionRoutes from './routes/promotion.routes'
 import waitlistRoutes from './routes/waitlist.routes'
 import adminRoutes from './routes/admin.routes'
 import stripeRoutes from './routes/stripe.routes'
+import uploadRoutes from './routes/upload.routes'
+import coursesRoutes from './routes/courses.routes'
 
 export const app = express()
 
@@ -40,6 +42,8 @@ app.use('/api/promotions', promotionRoutes)
 app.use('/api/waitlist', waitlistRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/stripe', stripeRoutes)
+app.use('/api/upload', uploadRoutes)
+app.use('/api/courses', coursesRoutes)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

@@ -8,11 +8,26 @@ export const DELIVERY_ZONE = {
   commune: 'Lège-Cap-Ferret',
 }
 
-export function calculateDeliveryFee(distanceKm: number): number {
-  const BASE_FEE = 5.0
-  const PER_KM = 1.0
-  const extraKm = Math.max(0, Math.floor(distanceKm) - 1)
-  return BASE_FEE + extraKm * PER_KM
+/** Frais fixes de déplacement (trajet) */
+export const DELIVERY_FIXED_FEE = 7.90
+
+/** Taux de préparation / picking (% du panier) */
+export const PICKING_RATE = 0.10
+
+/**
+ * Frais fixes de livraison (trajet).
+ * Indépendants du montant du panier.
+ */
+export function calculateDeliveryFee(_distanceKm?: number): number {
+  return DELIVERY_FIXED_FEE
+}
+
+/**
+ * Frais de préparation / picking = 10 % du sous-total.
+ * Rémunère le temps passé à faire les courses dans les rayons.
+ */
+export function calculatePickingFee(subtotal: number): number {
+  return Math.round(subtotal * PICKING_RATE * 100) / 100
 }
 
 export function formatPrice(amount: number): string {

@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { prisma } from '../lib/prisma'
 import { requireAdmin } from '../lib/auth'
+import { runAuchanScraper } from '../lib/auchan/scraper'
+import { scrapeAuchanCategories } from '../lib/auchan/category-scraper'
 
 const router = Router()
 
@@ -92,6 +94,68 @@ router.get('/stats', async (_req, res) => {
     series,
     topRestaurants,
   })
+})
+
+// POST /api/admin/auchan/scrape-categories — trigger category scraper only
+router.post('/auchan/scrape-categories', async (_req, res) => {
+  res.json({ ok: true, message: 'Auchan category scrape started' })
+  scrapeAuchanCategories().catch((e) => console.error('[auchan-categories]', e))
+})
+
+// POST /api/admin/auchan/scrape — trigger scraper manually
+let scrapeRunning = false
+router.post('/auchan/scrape', async (_req, res) => {
+  if (scrapeRunning) {
+    res.status(409).json({ error: 'Scrape already in progress' })
+    return
+  }
+  scrapeRunning = true
+  res.json({ ok: true, message: 'Auchan scrape started in background' })
+  runAuchanScraper().finally(() => { scrapeRunning = false })
+})
+
+// GET /api/admin/auchan/products — paginated list of scraped products
+router.get('/auchan/products', async (req, res) => {
+  const page = Math.max(1, Number(req.query.page) || 1)
+  const limit = Math.min(100, Number(req.query.limit) || 50)
+  const category = req.query.category as string | undefined
+  const showDisabled = req.query.disabled === 'true'
+
+  const where = {
+    ...(category ? { category } : {}),
+    ...(showDisabled ? { disabled: true } : {}),
+  }
+  const [total, withPrice, disabled, products] = await Promise.all([
+    prisma.auchanProduct.count({ where: category ? { category } : {} }),
+    prisma.auchanProduct.count({ where: { ...(category ? { category } : {}), price: { not: null } } }),
+    prisma.auchanProduct.count({ where: { ...(category ? { category } : {}), disabled: true } }),
+    prisma.auchanProduct.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { name: 'asc' },
+      select: { productId: true, name: true, brand: true, price: true, category: true, imageUrl: true, disabled: true },
+    }),
+  ])
+  res.json({ total, withPrice, disabled, page, limit, products })
+})
+
+// PATCH /api/admin/auchan/products/:id/disable — toggle disabled
+router.patch('/auchan/products/:id/disable', async (req, res) => {
+  const { id } = req.params
+  const { disabled } = req.body as { disabled: boolean }
+  const updated = await prisma.auchanProduct.update({
+    where: { productId: id },
+    data: { disabled: !!disabled },
+    select: { productId: true, disabled: true },
+  })
+  res.json(updated)
+})
+
+// DELETE /api/admin/auchan/products/:id — permanently remove
+router.delete('/auchan/products/:id', async (req, res) => {
+  await prisma.auchanProduct.delete({ where: { productId: req.params.id } })
+  res.json({ ok: true })
 })
 
 export default router

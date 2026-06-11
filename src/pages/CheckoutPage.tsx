@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { MapPin, AlertCircle, ArrowLeft, Zap, Package } from 'lucide-react'
@@ -28,14 +28,9 @@ export default function CheckoutPage() {
   const items = useCartStore((s) => s.items)
   const subtotal = useCartStore((s) => s.subtotal())
   const deliveryFee = useCartStore((s) => s.deliveryFee())
+  const pickingFee = useCartStore((s) => s.pickingFee())
   const discount = useCartStore((s) => s.discount())
   const total = useCartStore((s) => s.total())
-  const setServerFee = useCartStore((s) => s.setServerFee)
-  const setDeliveryDistanceKm = useCartStore((s) => s.setDeliveryDistanceKm)
-  const deliveryDistanceKm = useCartStore((s) => s.deliveryDistanceKm)
-
-  // Fix distance to 2 km on mount — slider removed
-  useEffect(() => { setDeliveryDistanceKm(2) }, [])
   const submitOrder = useCartStore((s) => s.submitOrder)
   const appliedPromo = useCartStore((s) => s.appliedPromo)
 
@@ -82,14 +77,6 @@ export default function CheckoutPage() {
     applepay: 'Apple Pay', cash: 'Espèces à la livraison',
   }
 
-  useEffect(() => {
-    if (subtotal === 0) return
-    let cancelled = false
-    api.settings.quote(deliveryDistanceKm, subtotal)
-      .then(({ fee }) => { if (!cancelled) setServerFee(fee.total) })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [deliveryDistanceKm, subtotal, setServerFee])
 
   if (items.length === 0) {
     return (
@@ -119,7 +106,7 @@ export default function CheckoutPage() {
         : ''
       const order = await submitOrder({
         customerName: name, customerPhone: phone, customerEmail: email || undefined,
-        deliveryAddress: address, deliveryDistanceKm, paymentMethod: payment,
+        deliveryAddress: address, deliveryDistanceKm: 2, paymentMethod: payment,
         notes: priorityNote + bakeryNote + (notes || '') || undefined,
       })
 
@@ -155,9 +142,8 @@ export default function CheckoutPage() {
   const grandTotal = total + prioritySurcharge
 
   // Estimated delivery window based on restaurant time + distance
-  const baseMin = 25 + Math.round(deliveryDistanceKm * 3)
-  const stdEta = `${baseMin}–${baseMin + 15} min`
-  const prioEta = `${Math.round(baseMin * 0.75)}–${Math.round(baseMin * 0.75) + 8} min`
+  const stdEta = '25–40 min'
+  const prioEta = '15–25 min'
 
   return (
     <main className="container-edge py-8">
@@ -455,8 +441,12 @@ export default function CheckoutPage() {
               </div>
             )}
             <div className="flex justify-between">
-              <dt className="text-muted">{t('cart.delivery')}</dt>
+              <dt className="text-muted">Livraison (trajet)</dt>
               <dd>{formatPrice(deliveryFee, i18n.language)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted">Préparation <span className="text-[10px]">(10 %)</span></dt>
+              <dd>{formatPrice(pickingFee, i18n.language)}</dd>
             </div>
             {deliveryOption === 'priority' && (
               <div className="flex justify-between text-ocean-500">

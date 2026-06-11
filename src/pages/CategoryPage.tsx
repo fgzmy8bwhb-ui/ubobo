@@ -94,7 +94,7 @@ export default function CategoryPage() {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">
             {shops.map((shop) => (
-              <ShopCard key={shop.id} shop={shop} />
+              <ShopCard key={shop.id} shop={shop as unknown as Restaurant} />
             ))}
           </div>
         )}

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Sparkles, ArrowRight, Clock, ShoppingCart } from 'lucide-react'
+import { Sparkles, ArrowRight, Clock } from 'lucide-react'
 import AddressBar from '@/components/customer/AddressBar'
 
 interface CategoryTile {
