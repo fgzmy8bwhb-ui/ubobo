@@ -7,6 +7,7 @@ import { LOYALTY_FREE_DELIVERY_COST, pointsEarnedFor } from '../lib/loyalty'
 import { generateOrderNumber } from '../lib/orderNumber'
 import { emitOrderCreated, emitOrderUpdated } from '../lib/socket'
 import { notifyAdminNewOrder } from '../lib/sms'
+import { sendEmail, orderConfirmationEmail, reviewRequestEmail } from '../lib/email'
 
 const router = Router()
 
@@ -201,6 +202,18 @@ router.post('/', optionalAuth, async (req, res) => {
     enabled: settings?.notifyAdminOnNewOrder ?? true,
   })
 
+  if (order.customerEmail) {
+    const { subject, html } = orderConfirmationEmail({
+      orderNumber: order.orderNumber,
+      restaurantName: order.restaurant.name,
+      items: order.items.map((i) => ({ name: i.name, quantity: i.quantity })),
+      total: order.total,
+      deliveryDate: order.deliveryDate,
+      deliverySlot: order.deliverySlot,
+    })
+    void sendEmail(order.customerEmail, subject, html)
+  }
+
   res.status(201).json({ order: serializeOrder(order) })
 })
 
@@ -292,6 +305,14 @@ router.patch('/:id/status', requireAdmin, async (req, res) => {
   })
 
   emitOrderUpdated({ orderNumber: order.orderNumber, status: order.status })
+
+  if (parsed.data.status === 'DELIVERED' && existing.status !== 'DELIVERED' && order.customerEmail) {
+    const { subject, html } = reviewRequestEmail({
+      orderNumber: order.orderNumber,
+      restaurantName: order.restaurant.name,
+    })
+    void sendEmail(order.customerEmail, subject, html)
+  }
 
   res.json({ order: serializeOrder(order) })
 })

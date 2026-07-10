@@ -29,6 +29,9 @@ export const env = {
   TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN ?? '',
   TWILIO_FROM_NUMBER: process.env.TWILIO_FROM_NUMBER ?? '',
   ADMIN_NOTIFY_PHONE: process.env.ADMIN_NOTIFY_PHONE ?? '',
+  RESEND_API_KEY: process.env.RESEND_API_KEY ?? '',
+  EMAIL_FROM: process.env.EMAIL_FROM ?? 'UBOBO <onboarding@resend.dev>',
+  FRONTEND_URL: process.env.FRONTEND_URL ?? 'https://ubobo.fr',
 }
 
 export const IS_DEV = env.NODE_ENV !== 'production'

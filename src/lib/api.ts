@@ -134,6 +134,12 @@ export const api = {
   reviews: {
     create: (body: { restaurantSlug: string; rating: number; comment?: string; orderId?: string }) =>
       request<{ review: any }>('/api/reviews', { method: 'POST', body }),
+    guestInfo: (orderNumber: string) =>
+      request<{ restaurantName: string; restaurantSlug: string; alreadyReviewed: boolean; existingReview: { rating: number; comment: string | null } | null }>(
+        `/api/reviews/guest/${orderNumber}`
+      ),
+    guestCreate: (body: { orderNumber: string; rating: number; comment?: string }) =>
+      request<{ review: any }>('/api/reviews/guest', { method: 'POST', body }),
   },
 
   promotions: {
