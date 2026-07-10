@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Phone, MapPin, RefreshCw, Calendar } from 'lucide-react'
 import { api, type ApiOrder } from '@/lib/api'
-import { joinAdminRoom } from '@/lib/socket'
 import { formatPrice, formatRelativeTime } from '@/lib/format'
 import { toast } from '@/hooks/useToast'
 
@@ -46,14 +45,6 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { void refresh() }, [filter])
 
-  useEffect(() => {
-    const unsubscribe = joinAdminRoom(
-      () => { void refresh(); toast.info('Nouvelle commande reçue !') },
-      () => { void refresh() }
-    )
-    return unsubscribe
-  }, [filter])
-
   async function setStatus(id: string, status: string) {
     try {
       await api.orders.setStatus(id, status)
@@ -69,9 +60,6 @@ export default function AdminOrdersPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold tracking-tight">{t('admin.orders')}</h1>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-pine/10 px-3 py-1 text-xs font-bold text-pine animate-pulse-dot">
-            ● {t('admin.live')}
-          </span>
           <button
             onClick={refresh}
             className="flex h-9 items-center gap-1.5 rounded-md border border-line bg-card px-3 text-xs font-semibold text-ink hover:bg-surface-alt"
