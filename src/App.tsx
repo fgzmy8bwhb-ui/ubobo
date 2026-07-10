@@ -19,7 +19,6 @@ const FavoritesPage = lazy(() => import('./pages/FavoritesPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const MyOrdersPage = lazy(() => import('./pages/MyOrdersPage'))
-const LoyaltyPage = lazy(() => import('./pages/LoyaltyPage'))
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage'))
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -54,7 +53,6 @@ function AnimatedRoutes() {
         <Route path="/confirmation" element={<ConfirmationPage />} />
         <Route path="/suivi/:orderNumber" element={<OrderTrackingPage />} />
         <Route path="/commandes" element={<MyOrdersPage />} />
-        <Route path="/fidelite" element={<LoyaltyPage />} />
         <Route path="/connexion" element={<LoginPage />} />
         <Route path="/inscription" element={<RegisterPage />} />
 

@@ -97,12 +97,7 @@ export default function Navbar() {
                       <p className="text-sm font-bold text-ink">{user.name ?? user.email}</p>
                       <p className="text-xs text-muted">{user.email}</p>
                     </div>
-                    <Link to="/commandes" onClick={() => setAccountOpen(false)} className="block px-4 py-2.5 text-sm hover:bg-surface-alt">{t('nav.orders')}</Link>
-                    <Link
-                      to="/fidelite"
-                      onClick={() => setAccountOpen(false)}
-                      className="block border-b border-line px-4 py-3 hover:bg-surface-alt"
-                    >
+                    <div className="border-b border-line px-4 py-3">
                       <div className="flex items-center justify-between text-xs font-semibold text-ink">
                         <span className="flex items-center gap-1.5"><Gift size={13} className="text-sunset-500" /> Fidélité</span>
                         <span>{loyaltyPoints} pts</span>
@@ -115,7 +110,8 @@ export default function Navbar() {
                           ? 'Livraison offerte disponible !'
                           : `${LOYALTY_GOAL - loyaltyPoints} pts avant une livraison offerte`}
                       </p>
-                    </Link>
+                    </div>
+                    <Link to="/commandes" onClick={() => setAccountOpen(false)} className="block px-4 py-2.5 text-sm hover:bg-surface-alt">{t('nav.orders')}</Link>
                     <Link to="/favoris" onClick={() => setAccountOpen(false)} className="block px-4 py-2.5 text-sm hover:bg-surface-alt">{t('nav.favorites')}</Link>
                     {user.role === 'ADMIN' && (
                       <Link to="/admin" onClick={() => setAccountOpen(false)} className="block px-4 py-2.5 text-sm font-semibold text-sunset-500 hover:bg-surface-alt">{t('nav.admin')}</Link>
@@ -212,12 +208,7 @@ export default function Navbar() {
 
               {user ? (
                 <>
-                  <Link to="/commandes" onClick={() => setMenuOpen(false)} className="mt-4 block py-2 text-base font-semibold text-ink">{t('nav.orders')}</Link>
-                  <Link
-                    to="/fidelite"
-                    onClick={() => setMenuOpen(false)}
-                    className="block rounded-xl border border-line bg-surface-alt px-4 py-3"
-                  >
+                  <div className="mt-4 rounded-xl border border-line bg-surface-alt px-4 py-3">
                     <div className="flex items-center justify-between text-sm font-semibold text-ink">
                       <span className="flex items-center gap-1.5"><Gift size={15} className="text-sunset-500" /> Fidélité</span>
                       <span>{loyaltyPoints} pts</span>
@@ -230,7 +221,8 @@ export default function Navbar() {
                         ? 'Livraison offerte disponible !'
                         : `${LOYALTY_GOAL - loyaltyPoints} pts avant une livraison offerte`}
                     </p>
-                  </Link>
+                  </div>
+                  <Link to="/commandes" onClick={() => setMenuOpen(false)} className="mt-2 block py-2 text-base font-semibold text-ink">{t('nav.orders')}</Link>
                   {user.role === 'ADMIN' && (
                     <Link to="/admin" onClick={() => setMenuOpen(false)} className="block py-2 text-base font-bold text-sunset-500">{t('nav.admin')}</Link>
                   )}
