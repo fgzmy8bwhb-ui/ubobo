@@ -107,7 +107,7 @@ const useCartStore = create<CartStore>()(
                 ...state.items,
                 { id: cartId, name: item.name, price: item.price, quantity: 1, selectedOptions },
               ]
-          return { items: updatedItems, restaurantId, restaurantName, isDrawerOpen: true }
+          return { items: updatedItems, restaurantId, restaurantName }
         })
       },
 

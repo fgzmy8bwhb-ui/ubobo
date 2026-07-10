@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, Clock, Info, MapPin, Plus, ShoppingBag, Star, X } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Info, MapPin, Minus, Plus, ShoppingBag, Star, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui'
@@ -132,6 +132,9 @@ export default function RestaurantDetailPage() {
 
   const addItem = useCartStore((s) => s.addItem)
   const clearCart = useCartStore((s) => s.clearCart)
+  const cartItems = useCartStore((s) => s.items)
+  const updateQuantity = useCartStore((s) => s.updateQuantity)
+  const removeItem = useCartStore((s) => s.removeItem)
   const cartRestaurantId = useCartStore((s) => s.restaurantId)
   const cartRestaurantName = useCartStore((s) => s.restaurantName)
   const totalItems = useCartStore((s) => s.totalItems())
@@ -349,21 +352,50 @@ export default function RestaurantDetailPage() {
                         <Info size={13} />
                       </button>
                     )}
-                    <button
-                      onClick={() => handleAdd(item)}
-                      disabled={!item.available}
-                      className={cn(
-                        'absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full shadow-lift transition-all',
-                        addedItemId === item.id
-                          ? 'bg-emerald-500 text-white scale-110'
-                          : item.available
-                          ? 'bg-ink text-surface hover:scale-105 active:scale-95'
-                          : 'bg-line text-muted cursor-not-allowed'
-                      )}
-                      aria-label={`${t('restaurant.addToCart')} ${item.name}`}
-                    >
-                      {addedItemId === item.id ? <Check size={16} strokeWidth={3} /> : <Plus size={18} strokeWidth={2.5} />}
-                    </button>
+                    {(() => {
+                      const hasOptions = !!item.options && item.options.length > 0
+                      const qty = hasOptions ? 0 : cartItems.find((i) => i.id === item.id)?.quantity ?? 0
+
+                      if (!hasOptions && qty > 0) {
+                        return (
+                          <div className="absolute bottom-3 right-3 flex items-center gap-2 rounded-full bg-ink px-1 py-1 shadow-lift">
+                            <button
+                              onClick={() => (qty <= 1 ? removeItem(item.id) : updateQuantity(item.id, qty - 1))}
+                              className="flex h-7 w-7 items-center justify-center rounded-full text-surface hover:bg-white/10 active:scale-95"
+                              aria-label={`Retirer un ${item.name}`}
+                            >
+                              <Minus size={14} strokeWidth={2.5} />
+                            </button>
+                            <span className="min-w-[1.25rem] text-center text-sm font-bold text-surface">{qty}</span>
+                            <button
+                              onClick={() => handleAdd(item)}
+                              className="flex h-7 w-7 items-center justify-center rounded-full text-surface hover:bg-white/10 active:scale-95"
+                              aria-label={`Ajouter un ${item.name}`}
+                            >
+                              <Plus size={14} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                        )
+                      }
+
+                      return (
+                        <button
+                          onClick={() => handleAdd(item)}
+                          disabled={!item.available}
+                          className={cn(
+                            'absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full shadow-lift transition-all',
+                            addedItemId === item.id
+                              ? 'bg-emerald-500 text-white scale-110'
+                              : item.available
+                              ? 'bg-ink text-surface hover:scale-105 active:scale-95'
+                              : 'bg-line text-muted cursor-not-allowed'
+                          )}
+                          aria-label={`${t('restaurant.addToCart')} ${item.name}`}
+                        >
+                          {addedItemId === item.id ? <Check size={16} strokeWidth={3} /> : <Plus size={18} strokeWidth={2.5} />}
+                        </button>
+                      )
+                    })()}
                   </li>
                 ))}
               </ul>
