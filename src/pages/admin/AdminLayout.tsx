@@ -49,7 +49,7 @@ export default function AdminLayout() {
   if (!user || user.role !== 'ADMIN') return null
 
   return (
-    <div className="flex min-h-screen bg-surface text-ink">
+    <div className="flex min-h-screen flex-col bg-surface text-ink md:flex-row">
       {/* Sidebar */}
       <aside className="hidden md:flex w-60 flex-col border-r border-line bg-card">
         <Link to="/" className="flex h-16 items-center gap-2 border-b border-line px-6">
@@ -132,7 +132,7 @@ export default function AdminLayout() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-x-hidden">
+      <main className="min-w-0 flex-1 overflow-x-hidden">
         <div className="p-6 md:p-10">
           <Outlet />
         </div>
