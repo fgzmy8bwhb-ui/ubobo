@@ -260,7 +260,7 @@ model AppSettings {
   currencySymbol        String   @default("€")
 
   // Delivery fee config (flat-rate, used when no zone matches)
-  deliveryBaseFee       Float    @default(5.0)
+  deliveryBaseFee       Float    @default(4.0)
   deliveryPerKmFee      Float    @default(1.0)
   deliveryFreeAbove     Float?   // free delivery when subtotal exceeds this
   deliveryMinOrder      Float    @default(0)

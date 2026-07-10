@@ -47,7 +47,7 @@ async function main() {
       defaultLocale: 'fr',
       currency: 'EUR',
       currencySymbol: '€',
-      deliveryBaseFee: 5.0,
+      deliveryBaseFee: 4.0,
       deliveryPerKmFee: 1.0,
       deliveryFreeAbove: null,
       deliveryMinOrder: 0,
