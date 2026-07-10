@@ -25,6 +25,16 @@
 
     <title>UBOBO — Livraison Cap Ferret</title>
 
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function (OneSignal) {
+        await OneSignal.init({
+          appId: "b3cfea63-0127-415d-b5a2-ecd415b53e85",
+        });
+      });
+    </script>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",

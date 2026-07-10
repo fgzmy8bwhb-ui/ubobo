@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Layout } from './components/layout'
 import ErrorBoundary from './components/shared/ErrorBoundary'
+import { usePushIdentity } from './hooks/usePushIdentity'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const CategoryPage = lazy(() => import('./pages/CategoryPage'))
@@ -108,5 +109,6 @@ function PageFallback() {
 }
 
 export default function App() {
+  usePushIdentity()
   return <AnimatedRoutes />
 }

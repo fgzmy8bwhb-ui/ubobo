@@ -8,6 +8,8 @@ import { generateOrderNumber } from '../lib/orderNumber'
 import { emitOrderCreated, emitOrderUpdated } from '../lib/socket'
 import { notifyAdminNewOrder } from '../lib/sms'
 import { sendEmail, orderConfirmationEmail, reviewRequestEmail } from '../lib/email'
+import { pushToAdmin, pushToUser } from '../lib/push'
+import { env } from '../lib/env'
 
 const router = Router()
 
@@ -202,6 +204,14 @@ router.post('/', optionalAuth, async (req, res) => {
     enabled: settings?.notifyAdminOnNewOrder ?? true,
   })
 
+  if (settings?.notifyAdminOnNewOrder ?? true) {
+    void pushToAdmin(
+      'Nouvelle commande !',
+      `${order.orderNumber} · ${order.restaurant.name} · ${order.total.toFixed(2)} €`,
+      `${env.FRONTEND_URL}/admin/orders`
+    )
+  }
+
   if (order.customerEmail) {
     const { subject, html } = orderConfirmationEmail({
       orderNumber: order.orderNumber,
@@ -312,6 +322,27 @@ router.patch('/:id/status', requireAdmin, async (req, res) => {
       restaurantName: order.restaurant.name,
     })
     void sendEmail(order.customerEmail, subject, html)
+  }
+
+  if (existing.status !== order.status && order.userId) {
+    const STATUS_LABEL_FR: Record<string, string> = {
+      PAID: 'Paiement confirmé',
+      ACCEPTED: 'Acceptée par le restaurant',
+      PREPARING: 'En préparation',
+      READY: 'Prête pour la livraison',
+      ON_THE_WAY: 'En cours de livraison',
+      DELIVERED: 'Livrée',
+      CANCELLED: 'Annulée',
+    }
+    const label = STATUS_LABEL_FR[order.status]
+    if (label) {
+      void pushToUser(
+        order.userId,
+        `Commande ${order.orderNumber}`,
+        label,
+        `${env.FRONTEND_URL}/suivi/${order.orderNumber}`
+      )
+    }
   }
 
   res.json({ order: serializeOrder(order) })
