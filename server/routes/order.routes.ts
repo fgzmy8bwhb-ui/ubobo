@@ -6,6 +6,7 @@ import { computeDeliveryFee, calculateServiceFee } from '../lib/delivery'
 import { LOYALTY_FREE_DELIVERY_COST, pointsEarnedFor } from '../lib/loyalty'
 import { generateOrderNumber } from '../lib/orderNumber'
 import { emitOrderCreated, emitOrderUpdated } from '../lib/socket'
+import { notifyAdminNewOrder } from '../lib/sms'
 
 const router = Router()
 
@@ -192,6 +193,13 @@ router.post('/', optionalAuth, async (req, res) => {
   })
 
   emitOrderCreated({ orderNumber: order.orderNumber })
+
+  void notifyAdminNewOrder({
+    orderNumber: order.orderNumber,
+    restaurantName: order.restaurant.name,
+    total: order.total,
+    enabled: settings?.notifyAdminOnNewOrder ?? true,
+  })
 
   res.status(201).json({ order: serializeOrder(order) })
 })

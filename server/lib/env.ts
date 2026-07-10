@@ -25,6 +25,10 @@ export const env = {
   CF_R2_SECRET_ACCESS_KEY: process.env.CF_R2_SECRET_ACCESS_KEY ?? '',
   CF_R2_BUCKET: process.env.CF_R2_BUCKET ?? 'ubobo-images',
   CF_R2_PUBLIC_URL: process.env.CF_R2_PUBLIC_URL ?? '',
+  TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID ?? '',
+  TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN ?? '',
+  TWILIO_FROM_NUMBER: process.env.TWILIO_FROM_NUMBER ?? '',
+  ADMIN_NOTIFY_PHONE: process.env.ADMIN_NOTIFY_PHONE ?? '',
 }
 
 export const IS_DEV = env.NODE_ENV !== 'production'
