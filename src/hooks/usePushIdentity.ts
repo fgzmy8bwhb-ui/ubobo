@@ -20,6 +20,12 @@ export function usePushIdentity() {
     window.OneSignalDeferred.push(async (OneSignal) => {
       await OneSignal.login(user.id)
       OneSignal.User.addTag('role', user.role === 'ADMIN' ? 'admin' : 'customer')
+
+      // Le SDK ne propose pas de popup automatique par défaut — on la déclenche
+      // nous-mêmes, juste après une action utilisateur (connexion).
+      if (OneSignal.Notifications.permission !== true) {
+        await OneSignal.Notifications.requestPermission()
+      }
     })
   }, [user])
 }
