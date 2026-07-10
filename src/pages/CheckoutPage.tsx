@@ -411,9 +411,9 @@ export default function CheckoutPage() {
                       selected={effectiveSlot}
                       onSelect={(s) => { if (!orderPlaced) useCartStore.getState().setDeliverySlot(s) }}
                       deliveryDate={effectiveDate}
-                      startHour={isBakery ? 8 : 8}
-                      endHour={isBakery ? 13 : 20}
-                      intervalMin={isBakery ? 10 : 30}
+                      windowStart={isBakery ? '08:00' : settings?.deliveryWindowStart}
+                      windowEnd={isBakery ? '13:00' : settings?.deliveryWindowEnd}
+                      intervalMin={isBakery ? 10 : settings?.deliverySlotIntervalMin}
                       takenSlots={takenSlots}
                     />
                   </div>

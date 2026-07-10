@@ -273,6 +273,12 @@ model AppSettings {
   serviceFeeRate  Float   @default(0) // 0.05 = 5%
   acceptingOrders Boolean @default(true)
 
+  // Delivery time slots — evolutive: change the interval/window here, slots
+  // are generated dynamically, no code change needed.
+  deliverySlotIntervalMin Int    @default(20)
+  deliveryWindowStart     String @default("08:30") // "HH:MM"
+  deliveryWindowEnd       String @default("20:30") // "HH:MM"
+
   // Notifications
   notifyAdminOnNewOrder Boolean @default(true)
 

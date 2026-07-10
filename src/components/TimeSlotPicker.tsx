@@ -5,19 +5,32 @@ interface Props {
   selected: string | null
   onSelect: (slot: string) => void
   deliveryDate?: string | null
-  startHour?: number
-  endHour?: number
+  /** Fenêtre de livraison "HH:MM" (ex: "08:30" → "20:30"). */
+  windowStart?: string
+  windowEnd?: string
+  /** Intervalle entre deux créneaux, en minutes. Change ici pour ajuster partout. */
   intervalMin?: number
   takenSlots?: string[]
 }
 
-function generateSlots(startHour: number, endHour: number, intervalMin: number): string[] {
+function timeToMin(t: string): number {
+  const [h, m] = t.split(':').map(Number)
+  return h * 60 + m
+}
+
+function minToTime(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+/** Génère les créneaux entre windowStart et windowEnd (inclus), espacés de intervalMin. */
+function generateSlots(windowStart: string, windowEnd: string, intervalMin: number): string[] {
+  const startMin = timeToMin(windowStart)
+  const endMin = timeToMin(windowEnd)
   const slots: string[] = []
-  for (let h = startHour; h <= endHour; h++) {
-    for (let m = 0; m < 60; m += intervalMin) {
-      if (h === endHour && m > 0) break
-      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
-    }
+  for (let m = startMin; m <= endMin; m += intervalMin) {
+    slots.push(minToTime(m))
   }
   return slots
 }
@@ -51,7 +64,10 @@ function groupByHour(slots: string[]): Record<string, string[]> {
   }, {})
 }
 
-export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliveryDateProp, startHour = 8, endHour = 13, intervalMin = 10, takenSlots = [] }: Props) {
+export default function TimeSlotPicker({
+  selected, onSelect, deliveryDate: deliveryDateProp,
+  windowStart = '08:30', windowEnd = '20:30', intervalMin = 20, takenSlots = [],
+}: Props) {
   // Use the passed date if available, otherwise fall back to computed tomorrow
   const displayDate = deliveryDateProp
     ? new Date(deliveryDateProp + 'T12:00:00')
@@ -62,10 +78,9 @@ export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliv
   const isToday = (deliveryDateProp ?? toISO(now)) === toISO(now)
   const minMinutesFromNow = now.getHours() * 60 + now.getMinutes() + PREP_BUFFER_MIN
 
-  const ALL_SLOTS = generateSlots(startHour, endHour, intervalMin).filter((slot) => {
+  const ALL_SLOTS = generateSlots(windowStart, windowEnd, intervalMin).filter((slot) => {
     if (!isToday) return true
-    const [h, m] = slot.split(':').map(Number)
-    return h * 60 + m >= minMinutesFromNow
+    return timeToMin(slot) >= minMinutesFromNow
   })
   const SLOTS_BY_HOUR = groupByHour(ALL_SLOTS)
 
@@ -139,7 +154,7 @@ export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliv
       {/* Footer */}
       <div className="border-t border-line bg-surface-alt/50 px-5 py-3">
         <p className="text-xs text-muted">
-          🚴 Commande possible pour aujourd'hui · Livraison entre <strong>{startHour}h et {endHour}h</strong>
+          🚴 Commande possible pour aujourd'hui · Livraison entre <strong>{windowStart} et {windowEnd}</strong>
         </p>
       </div>
     </div>

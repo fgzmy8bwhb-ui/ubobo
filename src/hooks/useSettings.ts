@@ -20,6 +20,9 @@ const FALLBACK: AppSettings = {
   deliveryMinOrder: 0,
   deliveryMaxDistanceKm: 4,
   acceptingOrders: true,
+  deliverySlotIntervalMin: 20,
+  deliveryWindowStart: '08:30',
+  deliveryWindowEnd: '20:30',
 }
 
 export const useSettings = create<SettingsState>((set) => ({

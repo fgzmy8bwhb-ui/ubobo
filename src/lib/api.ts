@@ -289,6 +289,9 @@ export interface AppSettings {
   deliveryMinOrder: number
   deliveryMaxDistanceKm: number
   acceptingOrders: boolean
+  deliverySlotIntervalMin: number
+  deliveryWindowStart: string
+  deliveryWindowEnd: string
 }
 
 export interface FeeBreakdown {

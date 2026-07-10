@@ -29,9 +29,14 @@ router.get('/', async (_req, res) => {
       deliveryMinOrder: s.deliveryMinOrder,
       deliveryMaxDistanceKm: s.deliveryMaxDistanceKm,
       acceptingOrders: s.acceptingOrders,
+      deliverySlotIntervalMin: s.deliverySlotIntervalMin,
+      deliveryWindowStart: s.deliveryWindowStart,
+      deliveryWindowEnd: s.deliveryWindowEnd,
     },
   })
 })
+
+const timeSchema = z.string().regex(/^\d{2}:\d{2}$/)
 
 const updateSchema = z.object({
   appName: z.string().optional(),
@@ -46,6 +51,9 @@ const updateSchema = z.object({
   serviceFeeRate: z.number().min(0).max(1).optional(),
   acceptingOrders: z.boolean().optional(),
   notifyAdminOnNewOrder: z.boolean().optional(),
+  deliverySlotIntervalMin: z.number().int().positive().optional(),
+  deliveryWindowStart: timeSchema.optional(),
+  deliveryWindowEnd: timeSchema.optional(),
 })
 
 // PATCH /api/settings — admin only

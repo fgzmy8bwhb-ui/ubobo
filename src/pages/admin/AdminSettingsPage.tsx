@@ -136,6 +136,45 @@ export default function AdminSettingsPage() {
 
       <section className="card-surface p-6">
         <div className="mb-4 flex items-center gap-2">
+          <Truck size={16} className="text-ocean" />
+          <h2 className="text-lg font-bold">Créneaux de livraison</h2>
+        </div>
+        <p className="text-xs text-muted">
+          Les créneaux proposés au checkout sont générés automatiquement à partir de ces valeurs — change l'intervalle ici, aucune modification de code n'est nécessaire.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="mb-1 block text-sm font-semibold">Ouverture</label>
+            <input
+              type="time"
+              value={settings.deliveryWindowStart}
+              onChange={(e) => update('deliveryWindowStart', e.target.value)}
+              className="input-base"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold">Fermeture</label>
+            <input
+              type="time"
+              value={settings.deliveryWindowEnd}
+              onChange={(e) => update('deliveryWindowEnd', e.target.value)}
+              className="input-base"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold">Intervalle (min)</label>
+            <input
+              type="number" step="5" min="5"
+              value={settings.deliverySlotIntervalMin}
+              onChange={(e) => update('deliverySlotIntervalMin', Number(e.target.value))}
+              className="input-base"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="card-surface p-6">
+        <div className="mb-4 flex items-center gap-2">
           <CalendarOff size={16} className="text-ocean" />
           <h2 className="text-lg font-bold">Jours fermés</h2>
         </div>
