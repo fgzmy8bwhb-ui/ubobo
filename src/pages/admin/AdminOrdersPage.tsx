@@ -32,18 +32,27 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<ApiOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('all')
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null)
+  const [, forceTick] = useState(0)
 
   async function refresh() {
     setLoading(true)
     try {
       const { orders } = await api.orders.listAll(filter === 'all' ? undefined : filter)
       setOrders(orders)
+      setLastRefreshedAt(new Date())
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => { void refresh() }, [filter])
+
+  // Rafraîchit juste l'affichage "il y a X" — ne relance jamais l'appel réseau.
+  useEffect(() => {
+    const tick = setInterval(() => forceTick((n) => n + 1), 15000)
+    return () => clearInterval(tick)
+  }, [])
 
   async function setStatus(id: string, status: string) {
     try {
@@ -60,6 +69,11 @@ export default function AdminOrdersPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold tracking-tight">{t('admin.orders')}</h1>
         <div className="flex items-center gap-2">
+          {lastRefreshedAt && (
+            <span className="text-xs text-muted">
+              Actualisé {formatRelativeTime(lastRefreshedAt, i18n.language)}
+            </span>
+          )}
           <button
             onClick={refresh}
             className="flex h-9 items-center gap-1.5 rounded-md border border-line bg-card px-3 text-xs font-semibold text-ink hover:bg-surface-alt"
