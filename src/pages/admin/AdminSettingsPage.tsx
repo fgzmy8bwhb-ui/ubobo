@@ -60,17 +60,17 @@ export default function AdminSettingsPage() {
               onChange={(e) => update('deliveryBaseFee', Number(e.target.value))}
               className="input-base"
             />
-            <p className="mt-1 text-xs text-muted">Tarif appliqué pour le 1er km.</p>
+            <p className="mt-1 text-xs text-muted">Tarif de base, quelle que soit la durée du trajet.</p>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-semibold">{t('admin.perKmFee')} (€)</label>
+            <label className="mb-1 block text-sm font-semibold">Frais par minute de trajet (€)</label>
             <input
-              type="number" step="0.5" min="0"
+              type="number" step="0.1" min="0"
               value={settings.deliveryPerKmFee}
               onChange={(e) => update('deliveryPerKmFee', Number(e.target.value))}
               className="input-base"
             />
-            <p className="mt-1 text-xs text-muted">Ajout par km au-delà du 1er.</p>
+            <p className="mt-1 text-xs text-muted">Ajout par minute de trajet estimée.</p>
           </div>
           <div>
             <label className="mb-1 block text-sm font-semibold">{t('admin.freeAbove')} (€)</label>

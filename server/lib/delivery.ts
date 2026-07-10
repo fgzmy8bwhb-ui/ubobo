@@ -2,8 +2,8 @@ import { prisma } from './prisma'
 
 export interface FeeBreakdown {
   baseFee: number
-  perKmFee: number
-  distanceKm: number
+  perMinFee: number
+  durationMin: number
   raw: number
   free: boolean
   total: number
@@ -12,22 +12,22 @@ export interface FeeBreakdown {
 
 /**
  * Compute delivery fee from AppSettings (or matching DeliveryZone).
- * Formula: base + perKm × max(0, ceil(distance - 1))
+ * Formula: base + perMin × durée du trajet (mêmes minutes que celles affichées au client).
  * If subtotal >= freeAbove (and set), fee = 0.
  *
- * This is the single source of truth for delivery pricing.
+ * This is the single source of vérité pour la tarification livraison.
  * Admin can change values from /admin/settings — no code changes required.
  */
 export async function computeDeliveryFee(opts: {
-  distanceKm: number
+  durationMin: number
   subtotal: number
   postalCode?: string
 }): Promise<FeeBreakdown> {
   const settings = await prisma.appSettings.findUnique({ where: { id: 'singleton' } })
 
   // Find a matching active zone (priority desc); fallback to settings
-  let base = settings?.deliveryBaseFee ?? 5
-  let perKm = settings?.deliveryPerKmFee ?? 1
+  let base = settings?.deliveryBaseFee ?? 3
+  let perMin = settings?.deliveryPerKmFee ?? 0.5
   let freeAbove = settings?.deliveryFreeAbove ?? null
   let source: 'settings' | 'zone' = 'settings'
 
@@ -38,23 +38,22 @@ export async function computeDeliveryFee(opts: {
     })
     if (zone) {
       base = zone.baseFee
-      perKm = zone.perKmFee
+      perMin = zone.perKmFee
       freeAbove = zone.freeAbove ?? null
       source = 'zone'
     }
   }
 
-  const distance = Math.max(0, opts.distanceKm)
-  const extraKm = Math.max(0, Math.floor(distance) - 1)
-  const raw = base + extraKm * perKm
+  const duration = Math.max(0, opts.durationMin)
+  const raw = base + duration * perMin
 
   const free = freeAbove != null && opts.subtotal >= freeAbove
   const total = free ? 0 : Math.round(raw * 100) / 100
 
   return {
     baseFee: base,
-    perKmFee: perKm,
-    distanceKm: distance,
+    perMinFee: perMin,
+    durationMin: duration,
     raw: Math.round(raw * 100) / 100,
     free,
     total,

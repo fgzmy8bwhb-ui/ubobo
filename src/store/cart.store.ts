@@ -60,6 +60,7 @@ interface CartStore {
     customerEmail?: string
     deliveryAddress: string
     deliveryDistanceKm: number
+    deliveryDurationMin: number
     paymentMethod: PaymentMethod
     notes?: string
     deliveryDate?: string
@@ -181,6 +182,7 @@ const useCartStore = create<CartStore>()(
           customerEmail: input.customerEmail,
           deliveryAddress: input.deliveryAddress,
           deliveryDistanceKm: input.deliveryDistanceKm,
+          deliveryDurationMin: input.deliveryDurationMin,
           paymentMethod: input.paymentMethod === 'card' ? 'CARD' : input.paymentMethod === 'card_on_delivery' ? 'CARD_ON_DELIVERY' : 'CASH',
           promotionCode: state.appliedPromo?.code,
           notes: input.notes,

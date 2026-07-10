@@ -108,8 +108,8 @@ export const api = {
     get: () => request<{ settings: AppSettings }>('/api/settings'),
     update: (patch: Partial<AppSettings>) =>
       request<{ settings: AppSettings }>('/api/settings', { method: 'PATCH', body: patch }),
-    quote: (distanceKm: number, subtotal: number, postalCode?: string) =>
-      request<{ fee: FeeBreakdown }>('/api/settings/quote', { method: 'POST', body: { distanceKm, subtotal, postalCode } }),
+    quote: (durationMin: number, subtotal: number, postalCode?: string) =>
+      request<{ fee: FeeBreakdown }>('/api/settings/quote', { method: 'POST', body: { durationMin, subtotal, postalCode } }),
     zones: () => request<{ zones: DeliveryZone[] }>('/api/settings/zones'),
     createZone: (z: Omit<DeliveryZone, 'id' | 'createdAt' | 'updatedAt'>) =>
       request<{ zone: DeliveryZone }>('/api/settings/zones', { method: 'POST', body: z }),
@@ -227,6 +227,7 @@ export interface CreateOrderBody {
   customerEmail?: string
   deliveryAddress: string
   deliveryDistanceKm: number
+  deliveryDurationMin: number
   paymentMethod: 'CARD' | 'CASH' | 'CARD_ON_DELIVERY'
   promotionCode?: string
   notes?: string
@@ -283,8 +284,8 @@ export interface AppSettings {
 
 export interface FeeBreakdown {
   baseFee: number
-  perKmFee: number
-  distanceKm: number
+  perMinFee: number
+  durationMin: number
   raw: number
   free: boolean
   total: number

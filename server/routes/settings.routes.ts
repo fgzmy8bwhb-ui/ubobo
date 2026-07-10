@@ -65,7 +65,7 @@ router.patch('/', requireAdmin, async (req, res) => {
 // (used by checkout to show the fee live)
 router.post('/quote', async (req, res) => {
   const schema = z.object({
-    distanceKm: z.number().nonnegative(),
+    durationMin: z.number().nonnegative(),
     subtotal: z.number().nonnegative(),
     postalCode: z.string().optional(),
   })

@@ -21,14 +21,12 @@ export function calculateDeliveryFee(_distanceKm?: number): number {
 
 /**
  * Frais de service UBOBO selon le montant du panier.
+ * Doit rester identique à calculateServiceFee côté serveur (server/lib/delivery.ts).
  */
 export function calculatePickingFee(subtotal: number): number {
-  if (subtotal < 5)    return 3
-  if (subtotal <= 10)  return 4
-  if (subtotal <= 20)  return 5
-  if (subtotal <= 30)  return 8
-  if (subtotal <= 50)  return 10
-  return 15
+  const raw = subtotal * 0.12
+  const roundedToHalf = Math.round(raw * 2) / 2
+  return Math.min(8, Math.max(1, roundedToHalf))
 }
 
 export function formatPrice(amount: number): string {

@@ -23,6 +23,7 @@ const createOrderSchema = z.object({
   customerEmail: z.string().email().optional(),
   deliveryAddress: z.string().min(1),
   deliveryDistanceKm: z.number().nonnegative(),
+  deliveryDurationMin: z.number().nonnegative(),
   paymentMethod: z.enum(['CARD', 'CASH', 'CARD_ON_DELIVERY']),
   promotionCode: z.string().optional(),
   notes: z.string().optional(),
@@ -97,7 +98,7 @@ router.post('/', optionalAuth, async (req, res) => {
   }
 
   const fee = await computeDeliveryFee({
-    distanceKm: data.deliveryDistanceKm,
+    durationMin: data.deliveryDurationMin,
     subtotal,
   })
 
