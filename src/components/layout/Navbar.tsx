@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, LogIn, Menu, Search, ShoppingBag, User, X } from 'lucide-react'
+import { Gift, Heart, LogIn, Menu, Search, ShoppingBag, User, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import useCartStore from '@/store/cart.store'
 import ThemeToggle from '@/components/shared/ThemeToggle'
@@ -32,6 +32,10 @@ export default function Navbar() {
     { to: '/categorie/courses',        label: 'Courses' },
     { to: '/categorie/livres',         label: 'Livres & Puzzles' },
   ]
+
+  const LOYALTY_GOAL = 200
+  const loyaltyPoints = user?.loyaltyPoints ?? 0
+  const loyaltyPct = Math.min(100, Math.round((loyaltyPoints / LOYALTY_GOAL) * 100))
 
   return (
     <>
@@ -92,6 +96,20 @@ export default function Navbar() {
                     <div className="border-b border-line px-4 py-3">
                       <p className="text-sm font-bold text-ink">{user.name ?? user.email}</p>
                       <p className="text-xs text-muted">{user.email}</p>
+                    </div>
+                    <div className="border-b border-line px-4 py-3">
+                      <div className="flex items-center justify-between text-xs font-semibold text-ink">
+                        <span className="flex items-center gap-1.5"><Gift size={13} className="text-sunset-500" /> Fidélité</span>
+                        <span>{loyaltyPoints} pts</span>
+                      </div>
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-alt">
+                        <div className="h-full rounded-full bg-sunset-500 transition-all" style={{ width: `${loyaltyPct}%` }} />
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted">
+                        {loyaltyPoints >= LOYALTY_GOAL
+                          ? 'Livraison offerte disponible !'
+                          : `${LOYALTY_GOAL - loyaltyPoints} pts avant une livraison offerte`}
+                      </p>
                     </div>
                     <Link to="/commandes" onClick={() => setAccountOpen(false)} className="block px-4 py-2.5 text-sm hover:bg-surface-alt">{t('nav.orders')}</Link>
                     <Link to="/favoris" onClick={() => setAccountOpen(false)} className="block px-4 py-2.5 text-sm hover:bg-surface-alt">{t('nav.favorites')}</Link>
@@ -190,6 +208,20 @@ export default function Navbar() {
 
               {user ? (
                 <>
+                  <div className="mt-4 rounded-xl border border-line bg-surface-alt px-4 py-3">
+                    <div className="flex items-center justify-between text-sm font-semibold text-ink">
+                      <span className="flex items-center gap-1.5"><Gift size={15} className="text-sunset-500" /> Fidélité</span>
+                      <span>{loyaltyPoints} pts</span>
+                    </div>
+                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-card">
+                      <div className="h-full rounded-full bg-sunset-500 transition-all" style={{ width: `${loyaltyPct}%` }} />
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted">
+                      {loyaltyPoints >= LOYALTY_GOAL
+                        ? 'Livraison offerte disponible !'
+                        : `${LOYALTY_GOAL - loyaltyPoints} pts avant une livraison offerte`}
+                    </p>
+                  </div>
                   <Link to="/commandes" onClick={() => setMenuOpen(false)} className="mt-2 block py-2 text-base font-semibold text-ink">{t('nav.orders')}</Link>
                   {user.role === 'ADMIN' && (
                     <Link to="/admin" onClick={() => setMenuOpen(false)} className="block py-2 text-base font-bold text-sunset-500">{t('nav.admin')}</Link>
