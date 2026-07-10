@@ -79,7 +79,6 @@ export default function CheckoutPage() {
     }
   }, [blockedDates, deliveryDate])
   const restaurantId = useCartStore((s) => s.restaurantId)
-  const isBakery = restaurantId === 'boulangerie-du-cap'
   const isAuchan = restaurantId === 'auchan-lege'
 
   // Coordonnées GPS du point de collecte — restaurants.ts ou fallback pour Auchan
@@ -411,9 +410,9 @@ export default function CheckoutPage() {
                       selected={effectiveSlot}
                       onSelect={(s) => { if (!orderPlaced) useCartStore.getState().setDeliverySlot(s) }}
                       deliveryDate={effectiveDate}
-                      windowStart={isBakery ? '08:00' : settings?.deliveryWindowStart}
-                      windowEnd={isBakery ? '13:00' : settings?.deliveryWindowEnd}
-                      intervalMin={isBakery ? 10 : settings?.deliverySlotIntervalMin}
+                      windowStart={settings?.deliveryWindowStart}
+                      windowEnd={settings?.deliveryWindowEnd}
+                      intervalMin={settings?.deliverySlotIntervalMin}
                       takenSlots={takenSlots}
                     />
                   </div>
