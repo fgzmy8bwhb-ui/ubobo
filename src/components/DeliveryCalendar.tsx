@@ -15,12 +15,12 @@ function toISO(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-// First orderable date: tomorrow, or +2 days if past 23h
+// First orderable date: today (commande possible jusqu'à 22h), sinon demain
 function getMinDate(): Date {
   const now = new Date()
   const d = new Date(now)
   d.setHours(0, 0, 0, 0)
-  d.setDate(d.getDate() + (now.getHours() >= 23 ? 2 : 1))
+  if (now.getHours() >= 22) d.setDate(d.getDate() + 1)
   return d
 }
 
@@ -129,25 +129,24 @@ export default function DeliveryCalendar({ selected, onSelect, selectedSlot }: P
       </div>
 
       {/* Footer: selected recap */}
-      <div className="border-t border-line px-5 py-3">
-        {selected && selectedSlot ? (
-          <p className="text-sm font-semibold text-ink">
-            📅 Livraison le{' '}
-            <strong>
+      {(selected) && (
+        <div className="border-t border-line px-4 py-2">
+          {selected && selectedSlot ? (
+            <p className="text-xs font-semibold text-ink">
+              Livraison le{' '}
+              <strong>
+                {new Date(selected + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </strong>{' '}
+              à <strong>{selectedSlot}</strong>
+            </p>
+          ) : (
+            <p className="text-xs text-muted">
               {new Date(selected + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </strong>{' '}
-            à <strong>{selectedSlot}</strong>
-          </p>
-        ) : selected ? (
-          <p className="text-sm text-muted">
-            📅{' '}
-            {new Date(selected + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            {' '}— choisissez l'heure dans le panier
-          </p>
-        ) : (
-          <p className="text-xs text-muted">🌙 Commandez avant <strong>23h</strong> pour une livraison le lendemain</p>
-        )}
-      </div>
+              {' '}— choisissez l'heure ci-dessous
+            </p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -43,4 +43,4 @@ Thumbs.db
 # Vercel
 .vercel
 
-public
+publicapi/index.js

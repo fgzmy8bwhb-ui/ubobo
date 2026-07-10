@@ -213,7 +213,7 @@ async function syncProduct(p: RawProduct): Promise<'created' | 'updated' | 'unch
   return 'updated'
 }
 
-async function scrapeCategory(category: AuchanCategory): Promise<ScrapeStats> {
+export async function scrapeCategory(category: AuchanCategory): Promise<ScrapeStats> {
   const browser = await chromium.launch({ headless: true })
   const ctx = await browser.newContext({
     userAgent:

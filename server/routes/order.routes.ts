@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma'
 import { optionalAuth, requireAdmin, requireAuth } from '../lib/auth'
-import { computeDeliveryFee } from '../lib/delivery'
+import { computeDeliveryFee, calculateServiceFee } from '../lib/delivery'
 import { generateOrderNumber } from '../lib/orderNumber'
 import { emitOrderCreated, emitOrderUpdated } from '../lib/socket'
 
@@ -23,9 +23,11 @@ const createOrderSchema = z.object({
   customerEmail: z.string().email().optional(),
   deliveryAddress: z.string().min(1),
   deliveryDistanceKm: z.number().nonnegative(),
-  paymentMethod: z.enum(['CARD', 'CASH']),
+  paymentMethod: z.enum(['CARD', 'CASH', 'CARD_ON_DELIVERY']),
   promotionCode: z.string().optional(),
   notes: z.string().optional(),
+  deliveryDate: z.string().optional(),
+  deliverySlot: z.string().optional(),
   items: z.array(orderItemSchema).min(1),
 })
 
@@ -36,6 +38,7 @@ function serializeOrder(o: any) {
     status: o.status,
     subtotal: o.subtotal,
     deliveryFee: o.deliveryFee,
+    serviceFee: o.serviceFee,
     discount: o.discount,
     total: o.total,
     paymentMethod: o.paymentMethod,
@@ -45,6 +48,8 @@ function serializeOrder(o: any) {
     customerPhone: o.customerPhone,
     customerEmail: o.customerEmail,
     notes: o.notes,
+    deliveryDate: o.deliveryDate,
+    deliverySlot: o.deliverySlot,
     restaurant: o.restaurant
       ? { name: o.restaurant.name, slug: o.restaurant.slug, phone: o.restaurant.phone }
       : undefined,
@@ -56,7 +61,6 @@ function serializeOrder(o: any) {
       selectedOptions: i.selectedOptionsJson ? JSON.parse(i.selectedOptionsJson) : undefined,
     })),
     createdAt: o.createdAt,
-    estimatedDeliveryAt: o.estimatedDeliveryAt,
     acceptedAt: o.acceptedAt,
     preparedAt: o.preparedAt,
     deliveredAt: o.deliveredAt,
@@ -123,9 +127,9 @@ router.post('/', optionalAuth, async (req, res) => {
     }
   }
 
-  const total = Math.max(0, subtotal + appliedDeliveryFee - discount)
+  const serviceFee = calculateServiceFee(restaurant.slug, subtotal)
+  const total = Math.max(0, subtotal + appliedDeliveryFee + serviceFee - discount)
   const orderNumber = generateOrderNumber()
-  const estimatedDeliveryAt = new Date(Date.now() + (restaurant.estimatedTimeMin + 15) * 60_000)
 
   const order = await prisma.order.create({
     data: {
@@ -135,6 +139,7 @@ router.post('/', optionalAuth, async (req, res) => {
       status: 'PENDING',
       subtotal: Math.round(subtotal * 100) / 100,
       deliveryFee: appliedDeliveryFee,
+      serviceFee,
       discount,
       total: Math.round(total * 100) / 100,
       promotionCode: data.promotionCode ?? null,
@@ -146,7 +151,8 @@ router.post('/', optionalAuth, async (req, res) => {
       paymentMethod: data.paymentMethod,
       paymentStatus: data.paymentMethod === 'CASH' ? 'PENDING' : 'PENDING',
       notes: data.notes ?? null,
-      estimatedDeliveryAt,
+      deliveryDate: data.deliveryDate ?? null,
+      deliverySlot: data.deliverySlot ?? null,
       items: {
         create: data.items.map((i) => ({
           menuItemId: i.menuItemId ?? null,
@@ -163,6 +169,23 @@ router.post('/', optionalAuth, async (req, res) => {
   emitOrderCreated({ orderNumber: order.orderNumber })
 
   res.status(201).json({ order: serializeOrder(order) })
+})
+
+// GET /api/slots/taken?date=YYYY-MM-DD
+router.get('/slots/taken', async (req, res) => {
+  const { date } = req.query as { date?: string }
+  if (!date) return res.json({ slots: [] })
+
+  const orders = await prisma.order.findMany({
+    where: {
+      deliveryDate: date,
+      deliverySlot: { not: null },
+      status: { notIn: ['CANCELLED'] },
+    },
+    select: { deliverySlot: true },
+  })
+
+  res.json({ slots: orders.map((o) => o.deliverySlot).filter(Boolean) })
 })
 
 // GET /api/orders/:orderNumber — public (anyone with order number)

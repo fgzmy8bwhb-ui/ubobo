@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Phone, MapPin, RefreshCw } from 'lucide-react'
+import { Phone, MapPin, RefreshCw, Calendar } from 'lucide-react'
 import { api, type ApiOrder } from '@/lib/api'
 import { joinAdminRoom } from '@/lib/socket'
 import { formatPrice, formatRelativeTime } from '@/lib/format'
@@ -116,6 +116,9 @@ export default function AdminOrdersPage() {
                     {o.paymentMethod === 'CASH' && (
                       <span className="rounded-full bg-sand text-deep px-2.5 py-0.5 text-xs font-bold">Cash</span>
                     )}
+                    {o.paymentMethod === 'CARD_ON_DELIVERY' && (
+                      <span className="rounded-full bg-sand text-deep px-2.5 py-0.5 text-xs font-bold">CB à la livraison</span>
+                    )}
                     {o.paymentStatus === 'PAID' && (
                       <span className="rounded-full bg-pine text-white px-2.5 py-0.5 text-xs font-bold">Payée</span>
                     )}
@@ -130,7 +133,7 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
+              <div className="mt-4 grid gap-3 text-sm md:grid-cols-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted">Client</p>
                   <p className="mt-1 font-semibold">{o.customerName}</p>
@@ -143,6 +146,15 @@ export default function AdminOrdersPage() {
                   <p className="mt-1 flex items-start gap-1.5 text-sm">
                     <MapPin size={13} className="mt-0.5 shrink-0 text-ocean" />
                     {o.deliveryAddress}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">Livraison souhaitée</p>
+                  <p className="mt-1 flex items-start gap-1.5 text-sm">
+                    <Calendar size={13} className="mt-0.5 shrink-0 text-ocean" />
+                    {o.deliveryDate
+                      ? `${new Date(`${o.deliveryDate}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}${o.deliverySlot ? ` · ${o.deliverySlot}` : ''}`
+                      : <span className="text-muted">Non précisé</span>}
                   </p>
                 </div>
                 <div>

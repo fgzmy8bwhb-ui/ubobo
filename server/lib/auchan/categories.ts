@@ -18,7 +18,7 @@ export const AUCHAN_CATEGORIES: AuchanCategory[] = [
   { slug: 'epicerie-salee',                   name: 'Epicerie salée',                          url: 'https://www.auchan.fr/epicerie-salee/ca-n06' },
   { slug: 'boissons-sans-alcool',             name: 'Eaux, jus, soda, thés glacés',            url: 'https://www.auchan.fr/boissons-sans-alcool/ca-n13' },
   { slug: 'vins-bieres-alcool',               name: 'Vins, bières, alcools',                   url: 'https://www.auchan.fr/vins-bieres-alcool/ca-n07' },
-  { slug: 'hygiene-beaute-parapharmacie',      name: 'Hygiène, beauté',                         url: 'https://www.auchan.fr/hygiene-beaute-parapharmacie/ca-n09' },
+  { slug: 'hygiene-beaute',                   name: 'Hygiène, beauté',                         url: 'https://www.auchan.fr/hygiene-beaute-parapharmacie/ca-n09' },
   { slug: 'entretien-maison',                 name: 'Entretien, accessoires de la maison',     url: 'https://www.auchan.fr/entretien-maison/ca-n10' },
   { slug: 'bebe',                             name: 'Tout pour bébé',                          url: 'https://www.auchan.fr/bebe/ca-n08' },
   { slug: 'animalerie',                       name: 'Animalerie',                              url: 'https://www.auchan.fr/animalerie/ca-n11' },

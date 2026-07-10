@@ -11,9 +11,6 @@ export const DELIVERY_ZONE = {
 /** Frais fixes de déplacement (trajet) */
 export const DELIVERY_FIXED_FEE = 7.90
 
-/** Taux de préparation / picking (% du panier) */
-export const PICKING_RATE = 0.10
-
 /**
  * Frais fixes de livraison (trajet).
  * Indépendants du montant du panier.
@@ -23,11 +20,15 @@ export function calculateDeliveryFee(_distanceKm?: number): number {
 }
 
 /**
- * Frais de préparation / picking = 10 % du sous-total.
- * Rémunère le temps passé à faire les courses dans les rayons.
+ * Frais de service UBOBO selon le montant du panier.
  */
 export function calculatePickingFee(subtotal: number): number {
-  return Math.round(subtotal * PICKING_RATE * 100) / 100
+  if (subtotal < 5)    return 3
+  if (subtotal <= 10)  return 4
+  if (subtotal <= 20)  return 5
+  if (subtotal <= 30)  return 8
+  if (subtotal <= 50)  return 10
+  return 15
 }
 
 export function formatPrice(amount: number): string {

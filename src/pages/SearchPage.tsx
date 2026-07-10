@@ -26,7 +26,6 @@ export default function SearchPage() {
     })
     r = r.slice()
     if (sort === 'nearest') r.sort((a, b) => a.distanceFromCenterKm - b.distanceFromCenterKm)
-    if (sort === 'fastest') r.sort((a, b) => a.estimatedTimeMin - b.estimatedTimeMin)
     if (sort === 'rating') r.sort((a, b) => b.averageRating - a.averageRating)
     if (sort === 'popular') r.sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured))
     return r

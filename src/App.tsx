@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Layout } from './components/layout'
+import ErrorBoundary from './components/shared/ErrorBoundary'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const CategoryPage = lazy(() => import('./pages/CategoryPage'))
@@ -28,6 +29,7 @@ const AdminRestaurantsPage = lazy(() => import('./pages/admin/AdminRestaurantsPa
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage'))
 const AdminPromotionsPage = lazy(() => import('./pages/admin/AdminPromotionsPage'))
 const AdminWaitlistPage = lazy(() => import('./pages/admin/AdminWaitlistPage'))
+const AdminCustomersPage = lazy(() => import('./pages/admin/AdminCustomersPage'))
 const AdminAuchanPage = lazy(() => import('./pages/admin/AdminAuchanPage'))
 
 function AnimatedRoutes() {
@@ -64,6 +66,7 @@ function AnimatedRoutes() {
           <Route path="promotions" element={<AdminPromotionsPage />} />
           <Route path="auchan" element={<AdminAuchanPage />} />
           <Route path="waitlist" element={<AdminWaitlistPage />} />
+          <Route path="customers" element={<AdminCustomersPage />} />
         </Route>
       </Routes>
     </Suspense>
@@ -82,11 +85,13 @@ function AnimatedRoutes() {
     <Layout>
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ y: 8 }}
+        animate={{ y: 0 }}
         transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        {inner}
+        <ErrorBoundary key={location.pathname}>
+          {inner}
+        </ErrorBoundary>
       </motion.div>
     </Layout>
   )

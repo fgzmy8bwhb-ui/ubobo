@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { request } from '@/lib/api'
+import { AUCHAN_ICON_BY_SLUG } from '@/data/courses-categories'
 
 interface AuchanNavCategory {
   slug: string
@@ -70,7 +71,7 @@ export default function CoursesPage() {
                   key={cat.slug}
                   slug={cat.slug}
                   label={cat.name}
-                  iconUrl={cat.iconUrl}
+                  iconUrl={AUCHAN_ICON_BY_SLUG[cat.slug] ?? cat.iconUrl ?? null}
                   available={available}
                   href={href}
                 />
@@ -99,7 +100,7 @@ function CategoryCard({
           <img
             src={iconUrl}
             alt={label}
-            className="h-full w-full object-contain p-1"
+            className="h-full w-full object-cover"
             loading="lazy"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />

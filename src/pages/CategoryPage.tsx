@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { ArrowLeft, Clock, MapPin, Moon } from 'lucide-react'
+import { ArrowLeft, MapPin } from 'lucide-react'
 import { useRestaurants } from '@/hooks/useRestaurants'
 import type { Restaurant } from '@/types'
 
@@ -9,20 +9,25 @@ const CATEGORY_META: Record<string, { name: string; gradient: string; descriptio
     gradient: 'from-amber-400 to-orange-500',
     description: 'Viennoiseries & pâtisseries fraîches',
   },
-  'fruits-de-mer': {
-    name: 'Fruits de Mer',
-    gradient: 'from-cyan-400 to-blue-500',
-    description: 'Plateaux, huîtres et poissons frais du bassin',
-  },
-  'huitres': {
-    name: 'Huîtres',
-    gradient: 'from-slate-400 to-blue-600',
-    description: 'Huîtres fraîches du bassin d\'Arcachon',
+  'apero': {
+    name: 'Apéro',
+    gradient: 'from-cyan-400 to-blue-600',
+    description: 'Huîtres, fruits de mer & alcools pour l\'apéro',
   },
   'courses': {
     name: 'Courses Arrivée',
     gradient: 'from-emerald-400 to-teal-500',
     description: 'Produits essentiels pour votre arrivée',
+  },
+  'patisserie': {
+    name: 'Pâtisserie',
+    gradient: 'from-pink-400 to-rose-500',
+    description: 'Gâteaux & douceurs sucrées',
+  },
+  'livres': {
+    name: 'Livres & Puzzles',
+    gradient: 'from-indigo-400 to-indigo-600',
+    description: 'Sélection de livres et puzzles sur le Cap Ferret',
   },
 }
 
@@ -61,21 +66,6 @@ export default function CategoryPage() {
           </div>
         </div>
       </div>
-
-      {/* Bannière commande anticipée — Petit Déjeuner uniquement */}
-      {slug === 'petit-dejeuner' && (
-        <div className="container-edge pt-6">
-          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800/50 dark:bg-amber-950/30">
-            <Moon size={20} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-            <div>
-              <p className="font-bold text-amber-800 dark:text-amber-200">Commande la veille avant 23h</p>
-              <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-300">
-                Les petit-déjeuners sont préparés chaque matin par la boulangerie. Passez votre commande <strong>avant 23h la veille</strong> et choisissez votre créneau de livraison entre <strong>8h et 13h</strong>.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Shop list */}
       <section className="container-edge pt-6">
@@ -145,10 +135,6 @@ function ShopCard({ shop }: { shop: Restaurant }) {
           <p className="text-sm text-muted leading-relaxed line-clamp-2">{shop.description}</p>
         )}
         <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-          <span className="flex items-center gap-1">
-            <Clock size={11} />
-            {shop.estimatedTimeMin}–{shop.estimatedTimeMin + 10} min
-          </span>
           {shop.address && (
             <span className="flex items-center gap-1">
               <MapPin size={11} />

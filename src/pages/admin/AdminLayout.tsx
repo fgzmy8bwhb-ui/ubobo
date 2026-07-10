@@ -11,6 +11,7 @@ import {
   Store,
   Sun,
   Tag,
+  Users,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
@@ -20,6 +21,7 @@ const navItems = [
   { to: '/admin', label: 'Tableau de bord', icon: BarChart3, end: true },
   { to: '/admin/orders', label: 'Commandes', icon: ClipboardList },
   { to: '/admin/restaurants', label: 'Restaurants', icon: Store },
+  { to: '/admin/customers', label: 'Clients', icon: Users },
   { to: '/admin/auchan', label: 'Courses Auchan', icon: ShoppingCart },
   { to: '/admin/promotions', label: 'Promotions', icon: Tag },
   { to: '/admin/waitlist', label: 'Liste d\'attente', icon: Mail },

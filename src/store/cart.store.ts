@@ -4,7 +4,7 @@ import type { CartItem, MenuItem } from '@/types'
 import { calculateDeliveryFee, calculatePickingFee } from '@/lib/delivery'
 import { api, type ApiOrder } from '@/lib/api'
 
-export type PaymentMethod = 'card' | 'cash'
+export type PaymentMethod = 'card' | 'cash' | 'card_on_delivery'
 
 export interface LastOrder {
   orderNumber: string
@@ -62,6 +62,8 @@ interface CartStore {
     deliveryDistanceKm: number
     paymentMethod: PaymentMethod
     notes?: string
+    deliveryDate?: string
+    deliverySlot?: string
   }) => Promise<ApiOrder>
 
   subtotal: () => number
@@ -179,9 +181,11 @@ const useCartStore = create<CartStore>()(
           customerEmail: input.customerEmail,
           deliveryAddress: input.deliveryAddress,
           deliveryDistanceKm: input.deliveryDistanceKm,
-          paymentMethod: input.paymentMethod === 'card' ? 'CARD' : 'CASH',
+          paymentMethod: input.paymentMethod === 'card' ? 'CARD' : input.paymentMethod === 'card_on_delivery' ? 'CARD_ON_DELIVERY' : 'CASH',
           promotionCode: state.appliedPromo?.code,
           notes: input.notes,
+          deliveryDate: input.deliveryDate,
+          deliverySlot: input.deliverySlot,
           items: state.items.map((i) => ({
             name: i.name, price: i.price, quantity: i.quantity, selectedOptions: i.selectedOptions,
           })),
@@ -208,9 +212,19 @@ const useCartStore = create<CartStore>()(
       deliveryFee: () => {
         const s = get()
         if (s.appliedPromo?.freeDelivery) return 0
+        // Utilise le frais calculé dynamiquement par useDeliveryCalculator si disponible
+        if (s.serverFee !== null) return s.serverFee
         return calculateDeliveryFee()
       },
-      pickingFee: () => calculatePickingFee(get().subtotal()),
+      pickingFee: () => {
+        const s = get()
+        const subtotal = s.subtotal()
+        // Commission 15% uniquement sur les courses Auchan
+        if (s.restaurantId === 'auchan-lege') {
+          return Math.round(subtotal * 0.15 * 100) / 100
+        }
+        return calculatePickingFee(subtotal)
+      },
       discount: () => get().appliedPromo?.discount ?? 0,
       total: () => Math.max(0, get().subtotal() + get().deliveryFee() + get().pickingFee() - get().discount()),
       totalItems: () => get().items.reduce((sum, item) => sum + item.quantity, 0),

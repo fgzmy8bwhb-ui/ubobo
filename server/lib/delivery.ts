@@ -61,3 +61,22 @@ export async function computeDeliveryFee(opts: {
     source,
   }
 }
+
+/** Slug du commerce Auchan — seul commerce facturé à la commission (15 %). */
+export const AUCHAN_RESTAURANT_SLUG = 'auchan-lege'
+
+/**
+ * Frais de service facturé au client — source de vérité côté serveur.
+ * Auchan : commission de 15 % du sous-total. Les autres commerces : barème fixe.
+ */
+export function calculateServiceFee(restaurantSlug: string, subtotal: number): number {
+  if (restaurantSlug === AUCHAN_RESTAURANT_SLUG) {
+    return Math.round(subtotal * 0.15 * 100) / 100
+  }
+  if (subtotal < 5)    return 3
+  if (subtotal <= 10)  return 4
+  if (subtotal <= 20)  return 5
+  if (subtotal <= 30)  return 8
+  if (subtotal <= 50)  return 10
+  return 15
+}

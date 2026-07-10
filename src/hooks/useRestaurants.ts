@@ -1,10 +1,31 @@
 import { useEffect, useState } from 'react'
 import { api, type ApiRestaurant } from '@/lib/api'
+import { restaurants as staticRestaurants } from '@/data/restaurants'
 
 interface State {
   restaurants: ApiRestaurant[]
   loading: boolean
   error: string | null
+}
+
+function toApiRestaurant(r: (typeof staticRestaurants)[0]): ApiRestaurant {
+  return {
+    id: r.id,
+    dbId: r.id,
+    name: r.name,
+    category: r.category as any,
+    status: (r.status ?? 'active') as any,
+    logo: r.logo,
+    coverImage: r.coverImage,
+    distanceFromCenterKm: r.distanceFromCenterKm ?? 0,
+    address: r.address ?? '',
+    phone: r.phone,
+    description: r.description,
+    averageRating: 0,
+    reviewCount: 0,
+    isFeatured: false,
+    menu: (r.menu ?? []).map((m) => ({ ...m, available: m.available ?? true })),
+  }
 }
 
 export function useRestaurants(params?: { category?: string; status?: string; search?: string }) {
@@ -18,8 +39,17 @@ export function useRestaurants(params?: { category?: string; status?: string; se
       .then((res) => {
         if (!cancelled) setState({ restaurants: res.restaurants, loading: false, error: null })
       })
-      .catch((e) => {
-        if (!cancelled) setState({ restaurants: [], loading: false, error: e?.message ?? 'NETWORK_ERROR' })
+      .catch(() => {
+        if (!cancelled) {
+          let fallback = staticRestaurants.map(toApiRestaurant)
+          if (params?.category) fallback = fallback.filter((r) => r.category === params.category)
+          if (params?.status) fallback = fallback.filter((r) => r.status === params.status)
+          if (params?.search) {
+            const q = params.search.toLowerCase()
+            fallback = fallback.filter((r) => r.name.toLowerCase().includes(q))
+          }
+          setState({ restaurants: fallback, loading: false, error: null })
+        }
       })
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,7 +69,12 @@ export function useRestaurant(slug: string | undefined) {
     setState((s) => ({ ...s, loading: true, error: null }))
     api.restaurants.get(slug)
       .then((res) => { if (!cancelled) setState({ restaurant: res.restaurant, loading: false, error: null }) })
-      .catch((e) => { if (!cancelled) setState({ restaurant: null, loading: false, error: e?.message ?? 'NETWORK_ERROR' }) })
+      .catch(() => {
+        if (!cancelled) {
+          const found = staticRestaurants.find((r) => r.id === slug)
+          setState({ restaurant: found ? toApiRestaurant(found) : null, loading: false, error: null })
+        }
+      })
     return () => { cancelled = true }
   }, [slug])
 

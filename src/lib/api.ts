@@ -1,7 +1,8 @@
 // Tiny typed fetch wrapper for the UBOBO REST API.
 // Auth: a JWT (if present) is read from localStorage and sent as Bearer header.
 
-const API_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:4000'
+// En prod (Vercel), l'API est servie sur la même origine (/api/*) → URL relative
+const API_URL = (import.meta.env.VITE_API_URL as string) || (import.meta.env.PROD ? '' : 'http://localhost:4000')
 const TOKEN_KEY = 'ubobo_token'
 
 export class ApiError extends Error {
@@ -99,6 +100,8 @@ export const api = {
       request<{ orders: ApiOrder[] }>(`/api/orders${status ? `?status=${status}` : ''}`),
     setStatus: (id: string, status: string) =>
       request<{ order: ApiOrder }>(`/api/orders/${id}/status`, { method: 'PATCH', body: { status } }),
+    takenSlots: (date: string) =>
+      request<{ slots: string[] }>(`/api/orders/slots/taken?date=${date}`),
   },
 
   settings: {
@@ -152,6 +155,13 @@ export const api = {
     paymentIntent: (orderNumber: string) =>
       request<{ clientSecret: string }>('/api/stripe/payment-intent', { method: 'POST', body: { orderNumber } }),
   },
+
+  sumup: {
+    checkout: (orderNumber: string) =>
+      request<{ checkoutId: string }>('/api/sumup/checkout', { method: 'POST', body: { orderNumber } }),
+    confirm: (orderNumber: string) =>
+      request<{ status: string }>('/api/sumup/confirm', { method: 'POST', body: { orderNumber } }),
+  },
 }
 
 function qs(o?: Record<string, string | undefined>) {
@@ -181,7 +191,6 @@ export interface ApiRestaurant {
   status: 'active' | 'coming_soon' | 'partner_pending' | 'paused'
   logo?: string
   coverImage?: string
-  estimatedTimeMin: number
   distanceFromCenterKm: number
   address: string
   phone?: string
@@ -218,9 +227,11 @@ export interface CreateOrderBody {
   customerEmail?: string
   deliveryAddress: string
   deliveryDistanceKm: number
-  paymentMethod: 'CARD' | 'CASH'
+  paymentMethod: 'CARD' | 'CASH' | 'CARD_ON_DELIVERY'
   promotionCode?: string
   notes?: string
+  deliveryDate?: string
+  deliverySlot?: string
   items: Array<{
     menuItemId?: string
     name: string
@@ -236,15 +247,18 @@ export interface ApiOrder {
   status: 'PENDING' | 'PAID' | 'ACCEPTED' | 'PREPARING' | 'READY' | 'ON_THE_WAY' | 'DELIVERED' | 'CANCELLED'
   subtotal: number
   deliveryFee: number
+  serviceFee: number
   discount: number
   total: number
-  paymentMethod: 'CARD' | 'CASH'
+  paymentMethod: 'CARD' | 'CASH' | 'CARD_ON_DELIVERY'
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED'
   deliveryAddress: string
   customerName: string
   customerPhone: string
   customerEmail?: string
   notes?: string
+  deliveryDate?: string | null
+  deliverySlot?: string | null
   restaurant?: { name: string; slug: string; phone?: string | null }
   items?: Array<{ id: string; name: string; price: number; quantity: number; selectedOptions?: Record<string, string> }>
   createdAt: string

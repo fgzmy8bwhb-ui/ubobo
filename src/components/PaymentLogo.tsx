@@ -2,17 +2,8 @@
 
 export function LogoCB() {
   return (
-    <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
-      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
-        <rect width="40" height="40" rx="10" fill="url(#cb-grad)"/>
-        <defs>
-          <linearGradient id="cb-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#1a6b6b"/>
-            <stop offset="1" stopColor="#2d9c8f"/>
-          </linearGradient>
-        </defs>
-        <text x="50%" y="57%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold" fontFamily="Arial,sans-serif">CB</text>
-      </svg>
+    <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white border border-line">
+      <img src="/cb.jpg" alt="CB" className="h-8 w-8 object-contain" />
     </span>
   )
 }
@@ -57,15 +48,5 @@ export function LogoApplePay() {
 }
 
 export function LogoCash() {
-  return (
-    <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[#5cb85c]">
-      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
-        <rect width="40" height="40" rx="10" fill="#5cb85c"/>
-        <rect x="7" y="13" width="26" height="14" rx="3" fill="white" opacity="0.25"/>
-        <rect x="9" y="15" width="22" height="10" rx="2" fill="white" opacity="0.15"/>
-        <circle cx="20" cy="20" r="5" fill="white" opacity="0.9"/>
-        <text x="50%" y="57%" dominantBaseline="middle" textAnchor="middle" fill="#5cb85c" fontSize="8" fontWeight="bold" fontFamily="Arial,sans-serif">€</text>
-      </svg>
-    </span>
-  )
+  return null
 }

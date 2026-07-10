@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, Clock, MapPin, Plus, ShoppingBag, Star } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Info, MapPin, Plus, ShoppingBag, Star, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui'
@@ -127,6 +127,7 @@ export default function RestaurantDetailPage() {
   const [optionItem, setOptionItem] = useState<MenuItem | null>(null)
   const [addedItemId, setAddedItemId] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [infoItem, setInfoItem] = useState<MenuItem | null>(null)
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const addItem = useCartStore((s) => s.addItem)
@@ -254,8 +255,8 @@ export default function RestaurantDetailPage() {
             <div className="card-surface relative p-5 sm:p-6">
               <div className="flex items-start gap-4">
                 {restaurant.logo && (
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-line bg-card p-1 sm:h-20 sm:w-20">
-                    <img src={restaurant.logo} alt={`Logo ${restaurant.name}`} className="h-full w-full object-contain" />
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-line bg-card sm:h-20 sm:w-20">
+                    <img src={restaurant.logo} alt={`Logo ${restaurant.name}`} className="h-full w-full object-cover" />
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
@@ -266,6 +267,12 @@ export default function RestaurantDetailPage() {
                   <p className="mt-0.5 text-sm text-muted">{categoryLabels[restaurant.category]}</p>
                   {restaurant.description && (
                     <p className="mt-2 text-sm leading-relaxed text-muted line-clamp-2">{restaurant.description}</p>
+                  )}
+                  {restaurant.id === 'la-cabane' && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                      <Clock size={12} className="shrink-0" />
+                      Pour les huîtres, commandez idéalement 1h avant la livraison souhaitée.
+                    </p>
                   )}
                 </div>
               </div>
@@ -278,9 +285,6 @@ export default function RestaurantDetailPage() {
                     <span className="text-muted">({restaurant.reviewCount} avis)</span>
                   </span>
                 )}
-                <span className="flex items-center gap-1.5 text-muted">
-                  <Clock size={14} /> {restaurant.estimatedTimeMin}–{restaurant.estimatedTimeMin + 10} min
-                </span>
                 <span className="flex items-center gap-1.5 text-muted">
                   <MapPin size={14} /> {restaurant.distanceFromCenterKm} km
                 </span>
@@ -335,6 +339,15 @@ export default function RestaurantDetailPage() {
                       <div className="relative h-28 w-28 shrink-0 sm:h-32 sm:w-32">
                         <img src={item.image} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
                       </div>
+                    )}
+                    {item.description && (
+                      <button
+                        onClick={() => setInfoItem(item)}
+                        className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-surface-alt border border-line text-muted hover:text-ink hover:border-ink/30 transition-all"
+                        aria-label={`Infos sur ${item.name}`}
+                      >
+                        <Info size={13} />
+                      </button>
                     )}
                     <button
                       onClick={() => handleAdd(item)}
@@ -408,6 +421,50 @@ export default function RestaurantDetailPage() {
             onConfirm={handleConfirmConflict}
             onCancel={() => { setPendingItem(null); setPendingOptions({}) }}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Modal info produit */}
+      <AnimatePresence>
+        {infoItem && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setInfoItem(null)}
+          >
+            <motion.div
+              initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="w-full max-w-md rounded-3xl bg-card border border-line overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {infoItem.image && (
+                <div className="h-48 w-full overflow-hidden">
+                  <img src={infoItem.image} alt={infoItem.name} className="h-full w-full object-cover" />
+                </div>
+              )}
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-lg font-bold text-ink leading-tight">{infoItem.name}</h3>
+                  <button onClick={() => setInfoItem(null)} className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-surface-alt hover:bg-line transition-colors">
+                    <X size={14} />
+                  </button>
+                </div>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{infoItem.description}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xl font-bold text-ink">{formatPrice(infoItem.price, i18n.language)}</span>
+                  {infoItem.available && (
+                    <button
+                      onClick={() => { handleAdd(infoItem); setInfoItem(null) }}
+                      className="flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-bold text-surface hover:bg-ink/80 transition-colors"
+                    >
+                      <Plus size={15} /> Ajouter
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

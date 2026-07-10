@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import { prisma } from '../lib/prisma'
 import { requireAdmin } from '../lib/auth'
-import { runAuchanScraper } from '../lib/auchan/scraper'
-import { scrapeAuchanCategories } from '../lib/auchan/category-scraper'
+// Imports paresseux : Playwright ne peut pas tourner en serverless (Vercel),
+// on ne charge le scraper que si un scrape est déclenché
 
 const router = Router()
 
@@ -96,10 +96,30 @@ router.get('/stats', async (_req, res) => {
   })
 })
 
+// GET /api/admin/customers — list all customer accounts
+router.get('/customers', async (_req, res) => {
+  const customers = await prisma.user.findMany({
+    where: { role: 'CUSTOMER' },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      address: true,
+      createdAt: true,
+      _count: { select: { orders: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+  res.json({ customers })
+})
+
 // POST /api/admin/auchan/scrape-categories — trigger category scraper only
 router.post('/auchan/scrape-categories', async (_req, res) => {
   res.json({ ok: true, message: 'Auchan category scrape started' })
-  scrapeAuchanCategories().catch((e) => console.error('[auchan-categories]', e))
+  import('../lib/auchan/category-scraper')
+    .then(({ scrapeAuchanCategories }) => scrapeAuchanCategories())
+    .catch((e) => console.error('[auchan-categories]', e))
 })
 
 // POST /api/admin/auchan/scrape — trigger scraper manually
@@ -111,7 +131,10 @@ router.post('/auchan/scrape', async (_req, res) => {
   }
   scrapeRunning = true
   res.json({ ok: true, message: 'Auchan scrape started in background' })
-  runAuchanScraper().finally(() => { scrapeRunning = false })
+  import('../lib/auchan/scraper')
+    .then(({ runAuchanScraper }) => runAuchanScraper())
+    .catch((e) => console.error('[auchan-scrape]', e))
+    .finally(() => { scrapeRunning = false })
 })
 
 // GET /api/admin/auchan/products — paginated list of scraped products

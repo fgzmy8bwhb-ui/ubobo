@@ -18,10 +18,13 @@ export default function CartPage() {
   const removeItem = useCartStore((s) => s.removeItem)
   const updateQuantity = useCartStore((s) => s.updateQuantity)
   const subtotal = useCartStore((s) => s.subtotal())
+  const serverFee = useCartStore((s) => s.serverFee)
   const deliveryFee = useCartStore((s) => s.deliveryFee())
   const pickingFee = useCartStore((s) => s.pickingFee())
   const discount = useCartStore((s) => s.discount())
-  const total = useCartStore((s) => s.total())
+  // Tant que l'adresse n'est pas connue, le vrai trajet n'est pas calculé —
+  // on n'affiche donc pas d'estimation de livraison avant l'étape commande.
+  const total = useCartStore((s) => s.total()) - (serverFee === null ? deliveryFee : 0)
   const appliedPromo = useCartStore((s) => s.appliedPromo)
   const applyPromo = useCartStore((s) => s.applyPromo)
   const clearPromo = useCartStore((s) => s.clearPromo)
@@ -136,10 +139,12 @@ export default function CartPage() {
             )}
             <div className="flex justify-between">
               <dt className="text-muted">Livraison (trajet)</dt>
-              <dd className="font-semibold">{formatPrice(deliveryFee, i18n.language)}</dd>
+              <dd className="font-semibold text-muted">
+                {serverFee === null ? 'Calculé à l\'étape suivante' : formatPrice(deliveryFee, i18n.language)}
+              </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted">Préparation des courses <span className="text-[10px] font-normal">(10 %)</span></dt>
+              <dt className="text-muted">Commission <span className="text-[10px] font-normal">(15 %)</span></dt>
               <dd className="font-semibold">{formatPrice(pickingFee, i18n.language)}</dd>
             </div>
             <div className="flex justify-between border-t border-line pt-3 text-base">

@@ -21,7 +21,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "setup": "npm install && npm run db:push && npm run db:seed",
-    "vercel-build": "prisma generate && npm run build:web"
+    "vercel-build": "prisma generate && npm run build:web && esbuild api-src/index.ts --bundle --platform=node --format=cjs --outfile=api/index.js --external:@prisma/client --external:.prisma --external:playwright"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

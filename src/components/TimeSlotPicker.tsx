@@ -4,28 +4,38 @@ import { CalendarDays, Clock } from 'lucide-react'
 interface Props {
   selected: string | null
   onSelect: (slot: string) => void
-  deliveryDate?: string | null  // "YYYY-MM-DD" passée depuis le checkout
+  deliveryDate?: string | null
+  startHour?: number
+  endHour?: number
+  intervalMin?: number
+  takenSlots?: string[]
 }
 
-// Generate slots every 10 min from 08:00 to 13:00
-function generateSlots(): string[] {
+function generateSlots(startHour: number, endHour: number, intervalMin: number): string[] {
   const slots: string[] = []
-  for (let h = 8; h <= 13; h++) {
-    for (let m = 0; m < 60; m += 10) {
-      if (h === 13 && m > 0) break
+  for (let h = startHour; h <= endHour; h++) {
+    for (let m = 0; m < 60; m += intervalMin) {
+      if (h === endHour && m > 0) break
       slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
     }
   }
   return slots
 }
 
-// Delivery date = tomorrow (or day after if past 23h)
+// Delivery date = aujourd'hui (ou demain si après 22h)
 function getDeliveryDate(): Date {
   const now = new Date()
   const d = new Date(now)
-  d.setDate(d.getDate() + (now.getHours() >= 23 ? 2 : 1))
+  if (now.getHours() >= 22) d.setDate(d.getDate() + 1)
   return d
 }
+
+function toISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Délai de préparation minimum avant un créneau, quand la livraison est pour aujourd'hui
+const PREP_BUFFER_MIN = 45
 
 function formatDate(d: Date): string {
   return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -41,14 +51,23 @@ function groupByHour(slots: string[]): Record<string, string[]> {
   }, {})
 }
 
-const ALL_SLOTS = generateSlots()
-const SLOTS_BY_HOUR = groupByHour(ALL_SLOTS)
-
-export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliveryDateProp }: Props) {
+export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliveryDateProp, startHour = 8, endHour = 13, intervalMin = 10, takenSlots = [] }: Props) {
   // Use the passed date if available, otherwise fall back to computed tomorrow
   const displayDate = deliveryDateProp
     ? new Date(deliveryDateProp + 'T12:00:00')
     : getDeliveryDate()
+
+  // Si la livraison est pour aujourd'hui, on masque les créneaux déjà trop proches
+  const now = new Date()
+  const isToday = (deliveryDateProp ?? toISO(now)) === toISO(now)
+  const minMinutesFromNow = now.getHours() * 60 + now.getMinutes() + PREP_BUFFER_MIN
+
+  const ALL_SLOTS = generateSlots(startHour, endHour, intervalMin).filter((slot) => {
+    if (!isToday) return true
+    const [h, m] = slot.split(':').map(Number)
+    return h * 60 + m >= minMinutesFromNow
+  })
+  const SLOTS_BY_HOUR = groupByHour(ALL_SLOTS)
 
   return (
     <div className="rounded-3xl border border-line bg-card overflow-hidden">
@@ -71,6 +90,11 @@ export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliv
 
       {/* Slots */}
       <div className="p-5 space-y-5">
+        {ALL_SLOTS.length === 0 && (
+          <p className="text-center text-sm text-muted">
+            Plus de créneau disponible aujourd'hui — choisissez un autre jour.
+          </p>
+        )}
         {Object.entries(SLOTS_BY_HOUR).sort(([a], [b]) => parseInt(a) - parseInt(b)).map(([hour, slots]) => (
           <div key={hour}>
             {/* Hour label */}
@@ -82,14 +106,18 @@ export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliv
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {slots.map((slot) => {
                 const isSelected = selected === slot
+                const isTaken = takenSlots.includes(slot)
                 return (
                   <button
                     key={slot}
                     type="button"
-                    onClick={() => onSelect(slot)}
+                    disabled={isTaken}
+                    onClick={() => !isTaken && onSelect(slot)}
                     className={cn(
                       'relative rounded-2xl border-2 px-2 py-2.5 text-center text-sm font-semibold transition-all duration-150 select-none',
-                      isSelected
+                      isTaken
+                        ? 'cursor-not-allowed border-line bg-surface-alt/40 text-muted/40 line-through'
+                        : isSelected
                         ? 'border-ink bg-ink text-surface shadow-sm scale-[1.04]'
                         : 'border-line bg-surface-alt text-ink hover:border-ink/40 hover:bg-card active:scale-95'
                     )}
@@ -111,7 +139,7 @@ export default function TimeSlotPicker({ selected, onSelect, deliveryDate: deliv
       {/* Footer */}
       <div className="border-t border-line bg-surface-alt/50 px-5 py-3">
         <p className="text-xs text-muted">
-          🌙 Commande à passer avant <strong>23h</strong> la veille · Livraison entre <strong>8h et 13h</strong>
+          🚴 Commande possible pour aujourd'hui · Livraison entre <strong>{startHour}h et {endHour}h</strong>
         </p>
       </div>
     </div>

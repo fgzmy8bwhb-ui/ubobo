@@ -19,6 +19,7 @@ export const env = {
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? 'admin123',
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? '',
+  SUMUP_API_KEY: process.env.SUMUP_API_KEY ?? '',
   CF_ACCOUNT_ID: process.env.CF_ACCOUNT_ID ?? '',
   CF_R2_ACCESS_KEY_ID: process.env.CF_R2_ACCESS_KEY_ID ?? '',
   CF_R2_SECRET_ACCESS_KEY: process.env.CF_R2_SECRET_ACCESS_KEY ?? '',

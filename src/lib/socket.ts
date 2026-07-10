@@ -1,6 +1,6 @@
 // Polling-based fallback — replaces Socket.io for Vercel deployment.
 // Orders refresh every 5 s; admin dashboard every 5 s.
-const API_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:4000'
+const API_URL = (import.meta.env.VITE_API_URL as string) || (import.meta.env.PROD ? '' : 'http://localhost:4000')
 const POLL_MS = 5000
 
 function authHeaders(): Record<string, string> {

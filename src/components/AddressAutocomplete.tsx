@@ -59,23 +59,11 @@ export default function AddressAutocomplete({ value, onChange, placeholder, requ
     debounceRef.current = setTimeout(async () => {
       setLoading(true)
       try {
-        // Bias search around Cap Ferret / Bassin d'Arcachon
-        const params = new URLSearchParams({
-          q: v,
-          format: 'json',
-          addressdetails: '1',
-          countrycodes: 'fr',
-          limit: '6',
-          // Bounding box around Bassin d'Arcachon
-          viewbox: '-1.3,44.4,-1.0,44.8',
-          bounded: '0',
-        })
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-          headers: { 'Accept-Language': 'fr' },
-        })
+        const res = await fetch(`/api/geocode/search?q=${encodeURIComponent(v)}`)
         const data: Suggestion[] = await res.json()
-        setSuggestions(data)
-        setOpen(data.length > 0)
+        const filtered = data.filter((s) => !s.address.postcode || s.address.postcode === '33970')
+        setSuggestions(filtered)
+        setOpen(filtered.length > 0)
       } catch {
         setSuggestions([])
       } finally {

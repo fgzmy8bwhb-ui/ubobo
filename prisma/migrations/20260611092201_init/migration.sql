@@ -22,7 +22,6 @@ CREATE TABLE "Restaurant" (
     "logo" TEXT,
     "coverImage" TEXT,
     "description" TEXT,
-    "estimatedTimeMin" INTEGER NOT NULL DEFAULT 30,
     "distanceFromCenterKm" REAL NOT NULL DEFAULT 1,
     "address" TEXT NOT NULL,
     "phone" TEXT,

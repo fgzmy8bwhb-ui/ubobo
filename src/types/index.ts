@@ -18,14 +18,15 @@ export interface MenuItem {
 export interface Restaurant {
   id: string
   name: string
-  category: 'petit-dejeuner' | 'fruits-de-mer' | 'huitres' | 'courses'
+  category: 'petit-dejeuner' | 'apero' | 'courses' | 'patisserie' | 'livres'
+  image?: string
   logo?: string
   coverImage?: string
-  estimatedTimeMin: number
   status: 'active' | 'coming_soon' | 'partner_pending' | 'paused'
   menu: MenuItem[]
   distanceFromCenterKm: number
   address: string
+  coords?: { lat: number; lng: number }
   phone?: string
   description?: string
   // Optional fields filled by the API

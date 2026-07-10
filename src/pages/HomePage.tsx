@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Sparkles, ArrowRight, Clock } from 'lucide-react'
+import { Sparkles, ArrowRight } from 'lucide-react'
 import AddressBar from '@/components/customer/AddressBar'
 
 interface CategoryTile {
@@ -10,9 +10,11 @@ interface CategoryTile {
   gradient: string
   bgLight: string
   textAccent: string
-  time: string
   comingSoon?: boolean
-  image: string
+  image?: string
+  coverImage?: string
+  noOverlay?: boolean
+  directTo?: string
 }
 
 const TILES: CategoryTile[] = [
@@ -24,42 +26,52 @@ const TILES: CategoryTile[] = [
     gradient: 'from-amber-400 to-orange-500',
     bgLight: 'bg-amber-50 dark:bg-amber-950/30',
     textAccent: 'text-amber-700 dark:text-amber-300',
-    time: '20–30 min',
     image: '/tiles/viennoiserie.webp',
+    directTo: '/restaurant/boulangerie-du-cap',
   },
   {
-    slug: 'fruits-de-mer',
-    name: 'Fruits de Mer',
-    description: 'Plateaux, huîtres et poissons frais du bassin d\'Arcachon',
-    sub: 'Poissonnerie Lucine · La Kabane',
-    gradient: 'from-cyan-400 to-blue-500',
+    slug: 'apero',
+    name: 'Apéro',
+    description: 'Huîtres, fruits de mer & alcools pour l\'apéro',
+    sub: 'La Kabane · Lucine · Alice',
+    gradient: 'from-cyan-400 to-blue-600',
     bgLight: 'bg-cyan-50 dark:bg-cyan-950/30',
     textAccent: 'text-cyan-700 dark:text-cyan-300',
-    time: '25–40 min',
-    image: '/tiles/fruits-de-mer.jpg',
-  },
-  {
-    slug: 'huitres',
-    name: 'Huîtres',
-    description: 'Huîtres fraîches du bassin d\'Arcachon, élevées dans nos parcs',
-    sub: 'La Kabane',
-    gradient: 'from-slate-400 to-blue-600',
-    bgLight: 'bg-slate-50 dark:bg-slate-950/30',
-    textAccent: 'text-slate-700 dark:text-slate-300',
-    time: '25–35 min',
     image: '/tiles/huitres.jpg',
   },
   {
     slug: 'courses',
-    name: 'Courses Arrivée',
+    name: 'Courses',
     description: 'Produits essentiels livrés avant votre arrivée en location',
-    sub: 'Bientôt disponible',
+    sub: 'Auchan',
     gradient: 'from-emerald-400 to-teal-500',
     bgLight: 'bg-emerald-50 dark:bg-emerald-950/30',
     textAccent: 'text-emerald-700 dark:text-emerald-300',
-    time: 'Sur commande',
-    comingSoon: true,
-    image: '/tiles/courses.jpg',
+    image: '/tiles/course.jpeg',
+    noOverlay: true,
+  },
+  {
+    slug: 'patisserie',
+    name: 'Pâtisserie',
+    description: 'Gâteaux & douceurs sucrées',
+    sub: 'Frédélian',
+    gradient: 'from-pink-400 to-rose-500',
+    bgLight: 'bg-pink-50 dark:bg-pink-950/30',
+    textAccent: 'text-pink-700 dark:text-pink-300',
+    image: '/tiles/patis.jpg',
+    noOverlay: true,
+  },
+  {
+    slug: 'livres',
+    name: 'Livres & Puzzles',
+    description: 'Sélection de livres et puzzles sur le Cap Ferret',
+    sub: 'Alice',
+    gradient: 'from-indigo-400 to-indigo-600',
+    bgLight: 'bg-indigo-50 dark:bg-indigo-950/30',
+    textAccent: 'text-indigo-700 dark:text-indigo-300',
+    image: '/tiles/librairie.jpg',
+    directTo: '/restaurant/alice-livres',
+    noOverlay: true,
   },
 ]
 
@@ -78,7 +90,7 @@ export default function HomePage() {
               <span className="text-ocean-500">sur le Cap Ferret.</span>
             </h1>
             <p className="mt-2 text-base text-muted md:max-w-md">
-              Petit déjeuner, fruits de mer ou courses — livrés directement chez vous.
+              Petit déjeuner, apéro ou courses — livrés directement chez vous.
             </p>
           </div>
           <div className="md:shrink-0">
@@ -101,12 +113,10 @@ export default function HomePage() {
       <section className="container-edge mt-10">
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { icon: '📍', title: 'Zone de livraison', text: 'Cap Ferret uniquement — Pointe, village, plages océan & bassin' },
-            { icon: '⏱️', title: 'Livraison rapide', text: 'En 20 à 40 min selon la catégorie, 7j/7 en saison' },
-            { icon: '💳', title: 'Paiement sécurisé', text: 'CB, Apple Pay, Google Pay ou espèces à la livraison' },
+            { title: 'Zone de livraison', text: 'Cap Ferret uniquement — Pointe, village, plages océan & bassin' },
+            { title: 'Paiement sécurisé', text: 'CB, Apple Pay, Google Pay ou espèces à la livraison' },
           ].map((item) => (
             <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-line bg-card p-4">
-              <span className="text-2xl leading-none">{item.icon}</span>
               <div>
                 <p className="font-bold text-ink">{item.title}</p>
                 <p className="mt-0.5 text-sm text-muted">{item.text}</p>
@@ -131,8 +141,9 @@ function CategoryTileCard({ tile }: { tile: CategoryTile }) {
               alt={tile.name}
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            {/* Overlay gradient pour lisibilité */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${tile.gradient} opacity-40 mix-blend-multiply`} />
+            {!tile.noOverlay && (
+              <div className={`absolute inset-0 bg-gradient-to-br ${tile.gradient} opacity-40 mix-blend-multiply`} />
+            )}
           </>
         )}
 
@@ -160,10 +171,6 @@ function CategoryTileCard({ tile }: { tile: CategoryTile }) {
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-1">
-          <span className="flex items-center gap-1.5 text-xs text-muted">
-            <Clock size={12} />
-            {tile.time}
-          </span>
           {!tile.comingSoon && (
             <span className="flex items-center gap-1 text-sm font-bold text-ink group-hover:gap-2 transition-all">
               Commander <ArrowRight size={15} />
@@ -180,8 +187,10 @@ function CategoryTileCard({ tile }: { tile: CategoryTile }) {
 
   if (tile.comingSoon) return inner
 
+  const to = tile.directTo ?? `/categorie/${tile.slug}`
+
   return (
-    <Link to={`/categorie/${tile.slug}`} className="block">
+    <Link to={to} className="block">
       {inner}
     </Link>
   )

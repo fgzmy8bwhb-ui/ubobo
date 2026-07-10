@@ -19,9 +19,9 @@ const prisma = new PrismaClient()
 function mapCategory(c: string): RestaurantCategory {
   const map: Record<string, RestaurantCategory> = {
     'petit-dejeuner': 'PETIT_DEJEUNER',
-    'fruits-de-mer':  'FRUITS_DE_MER',
-    'huitres':        'HUITRES',
+    'apero':          'APERO',
     'courses':        'COURSES',
+    'patisserie':     'PATISSERIE',
   }
   return map[c] ?? 'PETIT_DEJEUNER'
 }
@@ -89,7 +89,6 @@ async function main() {
         logo: r.logo ?? null,
         coverImage: r.coverImage ?? null,
         description: r.description ?? null,
-        estimatedTimeMin: r.estimatedTimeMin,
         distanceFromCenterKm: r.distanceFromCenterKm,
         address: r.address,
         phone: r.phone ?? null,
@@ -102,7 +101,6 @@ async function main() {
         logo: r.logo ?? null,
         coverImage: r.coverImage ?? null,
         description: r.description ?? null,
-        estimatedTimeMin: r.estimatedTimeMin,
         distanceFromCenterKm: r.distanceFromCenterKm,
         address: r.address,
         phone: r.phone ?? null,

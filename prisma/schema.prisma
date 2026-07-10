@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -53,9 +53,10 @@ enum RestaurantStatus {
 
 enum RestaurantCategory {
   PETIT_DEJEUNER
-  FRUITS_DE_MER
-  HUITRES
+  APERO
   COURSES
+  PATISSERIE
+  LIVRES
 }
 
 model Restaurant {
@@ -67,7 +68,6 @@ model Restaurant {
   logo                  String?
   coverImage            String?
   description           String?
-  estimatedTimeMin      Int                @default(30)
   distanceFromCenterKm  Float              @default(1)
   address               String
   phone                 String?
@@ -130,6 +130,7 @@ enum OrderStatus {
 enum PaymentMethod {
   CARD
   CASH
+  CARD_ON_DELIVERY
 }
 
 enum PaymentStatus {
@@ -147,6 +148,7 @@ model Order {
   status                OrderStatus   @default(PENDING)
   subtotal              Float
   deliveryFee           Float
+  serviceFee            Float         @default(0)
   total                 Float
   discount              Float         @default(0)
   promotionCode         String?
@@ -162,6 +164,11 @@ model Order {
   paymentMethod         PaymentMethod
   paymentStatus         PaymentStatus @default(PENDING)
   stripePaymentIntentId String?
+  sumupCheckoutId       String?
+
+  // Delivery scheduling
+  deliveryDate          String?
+  deliverySlot          String?
 
   // Notes from customer
   notes                 String?

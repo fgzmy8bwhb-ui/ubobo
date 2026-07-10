@@ -3,8 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useRestaurants } from '@/hooks/useRestaurants'
 import RestaurantCard from '@/components/RestaurantCard'
-import CategoryStrip, { CATEGORIES } from '@/components/customer/CategoryStrip'
-import PromoBanner from '@/components/customer/PromoBanner'
+import { CATEGORIES } from '@/components/customer/CategoryStrip'
 import type { Restaurant } from '@/types'
 
 export default function RestaurantsPage() {
@@ -36,31 +35,11 @@ export default function RestaurantsPage() {
   return (
     <main className="pb-12">
       <section className="container-edge pt-6">
-        <h1 className="text-display">{t('nav.restaurants')}</h1>
+        <h1 className="text-display">{t('Commerces locaux')}</h1>
         <p className="mt-1 text-sm text-muted">
           {restaurants.filter((r) => r.status === 'active').length} ouverts à Cap Ferret · 33970
         </p>
       </section>
-
-      <section className="container-edge pt-5">
-        <CategoryStrip active={category} onSelect={setCategory} />
-        <div className="mt-4 flex items-center justify-between">
-          <button
-            onClick={() => setOpenOnly((v) => !v)}
-            className={openOnly ? 'pill-active' : 'pill-default'}
-          >
-            <span className={'h-1.5 w-1.5 rounded-full ' + (openOnly ? 'bg-surface' : 'bg-emerald-500')} />
-            Ouverts maintenant
-          </button>
-          <span className="text-sm text-muted">
-            {loading ? '' : `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}`}
-          </span>
-        </div>
-      </section>
-
-      <div className="mt-6">
-        <PromoBanner />
-      </div>
 
       <section className="container-edge mt-8">
         {loading ? (

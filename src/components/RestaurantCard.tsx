@@ -1,4 +1,4 @@
-import { Clock, Star, ChevronRight } from 'lucide-react'
+import { Star, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Restaurant } from '@/types'
 import FavoriteButton from '@/components/customer/FavoriteButton'
@@ -6,16 +6,18 @@ import { cn } from '@/lib/cn'
 
 export const categoryLabels: Record<Restaurant['category'], string> = {
   'petit-dejeuner': 'Petit Déjeuner',
-  'fruits-de-mer': 'Fruits de Mer',
-  'huitres': 'Huîtres',
+  'apero': 'Apéro',
   'courses': 'Courses',
+  'patisserie': 'Pâtisserie',
+  'livres': 'Livres & Puzzles',
 }
 
 const categoryGradients: Record<Restaurant['category'], string> = {
-  'petit-dejeuner': 'from-amber-400/30 to-orange-500/30',
-  'fruits-de-mer': 'from-cyan-400/30 to-blue-500/30',
-  'huitres': 'from-slate-400/30 to-blue-600/30',
-  'courses': 'from-emerald-400/30 to-teal-500/30',
+  'petit-dejeuner': 'from-sunset-400 to-sunset-600',
+  'apero': 'from-ocean-400 to-ocean-600',
+  'courses': 'from-emerald-400 to-emerald-600',
+  'patisserie': 'from-rose-400 to-rose-600',
+  'livres': 'from-indigo-400 to-indigo-600',
 }
 
 function RestaurantVisual({ restaurant }: { restaurant: Restaurant }) {
@@ -83,9 +85,6 @@ export default function RestaurantCard({ restaurant }: { restaurant: Restaurant 
 
         {isActive && (
           <div className="mt-2 flex items-center gap-x-3 text-sm text-muted">
-            <span className="flex items-center gap-1">
-              <Clock size={12} /> {restaurant.estimatedTimeMin}–{restaurant.estimatedTimeMin + 10} min
-            </span>
             <span className="text-line">•</span>
             <span>{restaurant.distanceFromCenterKm} km</span>
             {showRating && (
