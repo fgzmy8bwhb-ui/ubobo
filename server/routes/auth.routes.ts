@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
   const token = signToken({ sub: user.id, role: user.role, email: user.email })
   res.json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, locale: user.locale },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, locale: user.locale, loyaltyPoints: user.loyaltyPoints },
   })
 })
 
@@ -57,14 +57,14 @@ router.post('/register', async (req, res) => {
   const token = signToken({ sub: user.id, role: user.role, email: user.email })
   res.status(201).json({
     token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role, locale: user.locale },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, locale: user.locale, loyaltyPoints: user.loyaltyPoints },
   })
 })
 
 router.get('/me', requireAuth, async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.sub },
-    select: { id: true, email: true, name: true, role: true, locale: true, phone: true, address: true },
+    select: { id: true, email: true, name: true, role: true, locale: true, phone: true, address: true, loyaltyPoints: true },
   })
   if (!user) return res.status(404).json({ error: 'NOT_FOUND' })
   res.json({ user })
@@ -83,7 +83,7 @@ router.patch('/me', requireAuth, async (req, res) => {
   const user = await prisma.user.update({
     where: { id: req.user!.sub },
     data: parsed.data,
-    select: { id: true, email: true, name: true, role: true, locale: true, phone: true, address: true },
+    select: { id: true, email: true, name: true, role: true, locale: true, phone: true, address: true, loyaltyPoints: true },
   })
   res.json({ user })
 })

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '../lib/prisma'
 import { optionalAuth, requireAdmin, requireAuth } from '../lib/auth'
 import { computeDeliveryFee, calculateServiceFee } from '../lib/delivery'
+import { LOYALTY_FREE_DELIVERY_COST, pointsEarnedFor } from '../lib/loyalty'
 import { generateOrderNumber } from '../lib/orderNumber'
 import { emitOrderCreated, emitOrderUpdated } from '../lib/socket'
 
@@ -29,6 +30,7 @@ const createOrderSchema = z.object({
   notes: z.string().optional(),
   deliveryDate: z.string().optional(),
   deliverySlot: z.string().optional(),
+  usePoints: z.boolean().optional(),
   items: z.array(orderItemSchema).min(1),
 })
 
@@ -42,6 +44,8 @@ function serializeOrder(o: any) {
     serviceFee: o.serviceFee,
     discount: o.discount,
     total: o.total,
+    usedLoyaltyPoints: o.usedLoyaltyPoints,
+    earnedLoyaltyPoints: o.earnedLoyaltyPoints,
     paymentMethod: o.paymentMethod,
     paymentStatus: o.paymentStatus,
     deliveryAddress: o.deliveryAddress,
@@ -128,6 +132,20 @@ router.post('/', optionalAuth, async (req, res) => {
     }
   }
 
+  // Utilisation des points de fidélité pour la livraison offerte (nécessite un compte)
+  let usedLoyaltyPoints = 0
+  if (data.usePoints && req.user?.sub) {
+    const user = await prisma.user.findUnique({ where: { id: req.user.sub } })
+    if (user && user.loyaltyPoints >= LOYALTY_FREE_DELIVERY_COST) {
+      appliedDeliveryFee = 0
+      usedLoyaltyPoints = LOYALTY_FREE_DELIVERY_COST
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { loyaltyPoints: { decrement: LOYALTY_FREE_DELIVERY_COST } },
+      })
+    }
+  }
+
   const serviceFee = calculateServiceFee(restaurant.slug, subtotal)
   const total = Math.max(0, subtotal + appliedDeliveryFee + serviceFee - discount)
   const orderNumber = generateOrderNumber()
@@ -144,6 +162,7 @@ router.post('/', optionalAuth, async (req, res) => {
       discount,
       total: Math.round(total * 100) / 100,
       promotionCode: data.promotionCode ?? null,
+      usedLoyaltyPoints,
       customerName: data.customerName,
       customerPhone: data.customerPhone,
       customerEmail: data.customerEmail ?? null,
@@ -225,6 +244,9 @@ router.patch('/:id/status', requireAdmin, async (req, res) => {
   const parsed = statusSchema.safeParse(req.body)
   if (!parsed.success) return res.status(400).json({ error: 'INVALID_INPUT' })
 
+  const existing = await prisma.order.findUnique({ where: { id: req.params.id } })
+  if (!existing) return res.status(404).json({ error: 'ORDER_NOT_FOUND' })
+
   const now = new Date()
   const timestamps: any = {}
   if (parsed.data.status === 'ACCEPTED') timestamps.acceptedAt = now
@@ -232,9 +254,27 @@ router.patch('/:id/status', requireAdmin, async (req, res) => {
   if (parsed.data.status === 'DELIVERED') timestamps.deliveredAt = now
   if (parsed.data.status === 'CANCELLED') timestamps.cancelledAt = now
 
+  // Crédite les points de fidélité à la livraison (une seule fois).
+  let earnedLoyaltyPoints = existing.earnedLoyaltyPoints
+  if (parsed.data.status === 'DELIVERED' && existing.status !== 'DELIVERED' && existing.userId) {
+    earnedLoyaltyPoints = pointsEarnedFor(existing.subtotal)
+    await prisma.user.update({
+      where: { id: existing.userId },
+      data: { loyaltyPoints: { increment: earnedLoyaltyPoints } },
+    })
+  }
+
+  // Rembourse les points utilisés si la commande est annulée.
+  if (parsed.data.status === 'CANCELLED' && existing.status !== 'CANCELLED' && existing.userId && existing.usedLoyaltyPoints > 0) {
+    await prisma.user.update({
+      where: { id: existing.userId },
+      data: { loyaltyPoints: { increment: existing.usedLoyaltyPoints } },
+    })
+  }
+
   const order = await prisma.order.update({
     where: { id: req.params.id },
-    data: { status: parsed.data.status, ...timestamps },
+    data: { status: parsed.data.status, earnedLoyaltyPoints, ...timestamps },
     include: { items: true, restaurant: true },
   })
 

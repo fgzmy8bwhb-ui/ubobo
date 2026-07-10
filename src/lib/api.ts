@@ -181,6 +181,7 @@ export interface AuthUser {
   locale: 'fr' | 'en' | string
   phone?: string | null
   address?: string | null
+  loyaltyPoints?: number
 }
 
 export interface ApiRestaurant {
@@ -233,6 +234,7 @@ export interface CreateOrderBody {
   notes?: string
   deliveryDate?: string
   deliverySlot?: string
+  usePoints?: boolean
   items: Array<{
     menuItemId?: string
     name: string
@@ -251,6 +253,8 @@ export interface ApiOrder {
   serviceFee: number
   discount: number
   total: number
+  usedLoyaltyPoints: number
+  earnedLoyaltyPoints: number
   paymentMethod: 'CARD' | 'CASH' | 'CARD_ON_DELIVERY'
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED'
   deliveryAddress: string

@@ -47,6 +47,10 @@ export default function CheckoutPage() {
     if (!address && savedAddress) setAddress(savedAddress)
   }, [savedAddress])
   const [notes, setNotes] = useState('')
+  const LOYALTY_FREE_DELIVERY_COST = 200
+  const userPoints = user?.loyaltyPoints ?? 0
+  const canUsePoints = userPoints >= LOYALTY_FREE_DELIVERY_COST
+  const [usePoints, setUsePoints] = useState(false)
 
   const deliverySlot = useCartStore((s) => s.deliverySlot)
   const deliveryDate = useCartStore((s) => s.deliveryDate)
@@ -195,6 +199,7 @@ export default function CheckoutPage() {
             deliveryAddress: address,
             deliveryDistanceKm: distanceKm ?? 2,
             deliveryDurationMin: durationMin ?? 6,
+            usePoints: usePoints && canUsePoints,
             paymentMethod: 'card',
             notes: notes || undefined,
             deliveryDate: scheduledDate ?? undefined,
@@ -296,6 +301,7 @@ export default function CheckoutPage() {
         deliveryAddress: address,
         deliveryDistanceKm: distanceKm ?? 2,
         deliveryDurationMin: durationMin ?? 6,
+        usePoints: usePoints && canUsePoints,
         paymentMethod: payment,
         notes: notes || undefined,
         deliveryDate: deliveryDate ?? undefined,
@@ -626,6 +632,17 @@ export default function CheckoutPage() {
                 <dd>− {formatPrice(frozenOrder?.discount ?? discount, i18n.language)}</dd>
               </div>
             )}
+            {!frozenOrder && user && canUsePoints && (
+              <label className="flex items-center gap-2 rounded-lg bg-surface-alt px-3 py-2.5 text-xs cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={usePoints}
+                  onChange={(e) => setUsePoints(e.target.checked)}
+                  className="h-4 w-4 accent-ocean"
+                />
+                <span>Utiliser mes <strong>{userPoints} points</strong> pour la livraison offerte (200 pts)</span>
+              </label>
+            )}
             {/* ── Livraison détaillée ── */}
             <div className="space-y-1.5">
               {!frozenOrder && deliveryLoading && (
@@ -662,11 +679,11 @@ export default function CheckoutPage() {
               )}
 
               <div className="flex justify-between">
-                <dt className="text-muted">Livraison</dt>
+                <dt className="text-muted">Livraison{!frozenOrder && usePoints && canUsePoints && <span className="text-emerald-600 dark:text-emerald-400"> (offerte)</span>}</dt>
                 <dd>
                   {!frozenOrder && deliveryLoading
                     ? <span className="text-muted text-xs">…</span>
-                    : formatPrice(frozenOrder?.deliveryFee ?? deliveryFee, i18n.language)}
+                    : formatPrice(frozenOrder?.deliveryFee ?? (usePoints && canUsePoints ? 0 : deliveryFee), i18n.language)}
                 </dd>
               </div>
             </div>
@@ -678,7 +695,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between border-t border-line pt-2 text-base font-bold">
               <dt>{t('cart.total')}</dt>
-              <dd>{formatPrice(frozenOrder?.total ?? total, i18n.language)}</dd>
+              <dd>{formatPrice(frozenOrder?.total ?? (usePoints && canUsePoints ? total - deliveryFee : total), i18n.language)}</dd>
             </div>
           </dl>
         </aside>

@@ -65,6 +65,7 @@ interface CartStore {
     notes?: string
     deliveryDate?: string
     deliverySlot?: string
+    usePoints?: boolean
   }) => Promise<ApiOrder>
 
   subtotal: () => number
@@ -188,6 +189,7 @@ const useCartStore = create<CartStore>()(
           notes: input.notes,
           deliveryDate: input.deliveryDate,
           deliverySlot: input.deliverySlot,
+          usePoints: input.usePoints,
           items: state.items.map((i) => ({
             name: i.name, price: i.price, quantity: i.quantity, selectedOptions: i.selectedOptions,
           })),
