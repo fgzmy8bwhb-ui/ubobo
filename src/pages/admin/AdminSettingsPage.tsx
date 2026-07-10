@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Save, Truck } from 'lucide-react'
-import { api, type AppSettings } from '@/lib/api'
+import { CalendarOff, Save, Truck, X } from 'lucide-react'
+import { api, type AppSettings, type BlockedDate } from '@/lib/api'
 import { Button } from '@/components/ui'
 import { toast } from '@/hooks/useToast'
 import { useSettings } from '@/hooks/useSettings'
@@ -12,8 +12,39 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
   const setLocal = useSettings((s) => s.setLocal)
 
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([])
+  const [newBlockedDate, setNewBlockedDate] = useState('')
+  const [newBlockedReason, setNewBlockedReason] = useState('')
+
+  function loadBlockedDates() {
+    api.settings.blockedDates().then(({ dates }) => setBlockedDates(dates))
+  }
+
+  async function addBlockedDate() {
+    if (!newBlockedDate) return
+    try {
+      await api.settings.blockDate(newBlockedDate, newBlockedReason || undefined)
+      setNewBlockedDate('')
+      setNewBlockedReason('')
+      loadBlockedDates()
+      toast.success('Jour fermé ajouté')
+    } catch {
+      toast.error(t('common.error'))
+    }
+  }
+
+  async function removeBlockedDate(date: string) {
+    try {
+      await api.settings.unblockDate(date)
+      loadBlockedDates()
+    } catch {
+      toast.error(t('common.error'))
+    }
+  }
+
   useEffect(() => {
     api.settings.get().then(({ settings }) => setSettings(settings))
+    loadBlockedDates()
   }, [])
 
   if (!settings) return <p className="text-sm text-muted">{t('common.loading')}</p>
@@ -101,6 +132,57 @@ export default function AdminSettingsPage() {
             />
           </div>
         </div>
+      </section>
+
+      <section className="card-surface p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <CalendarOff size={16} className="text-ocean" />
+          <h2 className="text-lg font-bold">Jours fermés</h2>
+        </div>
+        <p className="text-xs text-muted">Aucun créneau de livraison ne sera proposé aux clients pour ces dates.</p>
+
+        <div className="mt-4 flex flex-wrap items-end gap-2">
+          <div>
+            <label className="mb-1 block text-xs font-semibold">Date</label>
+            <input
+              type="date"
+              value={newBlockedDate}
+              onChange={(e) => setNewBlockedDate(e.target.value)}
+              className="input-base"
+            />
+          </div>
+          <div className="flex-1 min-w-[160px]">
+            <label className="mb-1 block text-xs font-semibold">Raison (optionnel)</label>
+            <input
+              type="text"
+              value={newBlockedReason}
+              onChange={(e) => setNewBlockedReason(e.target.value)}
+              placeholder="Ex: indisponible"
+              className="input-base"
+            />
+          </div>
+          <Button onClick={addBlockedDate} disabled={!newBlockedDate}>Fermer ce jour</Button>
+        </div>
+
+        {blockedDates.length > 0 && (
+          <ul className="mt-4 divide-y divide-line">
+            {blockedDates.map((d) => (
+              <li key={d.id} className="flex items-center justify-between py-2.5 text-sm">
+                <div>
+                  <span className="font-semibold">{new Date(d.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                  {d.reason && <span className="ml-2 text-muted">— {d.reason}</span>}
+                </div>
+                <button
+                  onClick={() => removeBlockedDate(d.date)}
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface-alt hover:text-red-500"
+                  aria-label="Réouvrir ce jour"
+                >
+                  <X size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="card-surface p-6">

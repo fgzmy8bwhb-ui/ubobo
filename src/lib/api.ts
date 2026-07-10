@@ -117,6 +117,11 @@ export const api = {
       request<{ zone: DeliveryZone }>(`/api/settings/zones/${id}`, { method: 'PATCH', body: z }),
     deleteZone: (id: string) =>
       request<void>(`/api/settings/zones/${id}`, { method: 'DELETE' }),
+    blockedDates: () => request<{ dates: BlockedDate[] }>('/api/settings/blocked-dates'),
+    blockDate: (date: string, reason?: string) =>
+      request<{ date: BlockedDate }>('/api/settings/blocked-dates', { method: 'POST', body: { date, reason } }),
+    unblockDate: (date: string) =>
+      request<void>(`/api/settings/blocked-dates/${date}`, { method: 'DELETE' }),
   },
 
   favorites: {
@@ -309,6 +314,13 @@ export interface DeliveryZone {
   priority: number
   createdAt: string
   updatedAt: string
+}
+
+export interface BlockedDate {
+  id: string
+  date: string
+  reason?: string | null
+  createdAt: string
 }
 
 export interface Promotion {

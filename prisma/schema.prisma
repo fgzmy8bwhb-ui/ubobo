@@ -280,6 +280,21 @@ model AppSettings {
 }
 
 // ============================================================
+// BLOCKED DELIVERY DATES
+// ============================================================
+// Days on which no delivery slot can be booked (e.g. admin unavailable).
+// Managed from /admin/settings.
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  date      String   @unique // "YYYY-MM-DD"
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([date])
+}
+
+// ============================================================
 // DELIVERY ZONES (optional, future-proofing for per-zone fees)
 // ============================================================
 // If any zone matches, its fee overrides AppSettings flat-rate.

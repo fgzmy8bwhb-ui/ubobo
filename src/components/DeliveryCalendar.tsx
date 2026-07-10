@@ -6,6 +6,7 @@ interface Props {
   selected: string | null   // "YYYY-MM-DD"
   onSelect: (date: string) => void
   selectedSlot?: string | null
+  blockedDates?: string[]   // ["YYYY-MM-DD", ...]
 }
 
 const DAYS_FR = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
@@ -29,7 +30,7 @@ function weekDayMon(d: Date) {
   return (d.getDay() + 6) % 7
 }
 
-export default function DeliveryCalendar({ selected, onSelect, selectedSlot }: Props) {
+export default function DeliveryCalendar({ selected, onSelect, selectedSlot, blockedDates = [] }: Props) {
   const minDate = getMinDate()
   const [viewYear, setViewYear] = useState(minDate.getFullYear())
   const [viewMonth, setViewMonth] = useState(minDate.getMonth())
@@ -100,6 +101,8 @@ export default function DeliveryCalendar({ selected, onSelect, selectedSlot }: P
           cellDate.setHours(0, 0, 0, 0)
           const iso = toISO(cellDate)
           const isPast = cellDate < minDate
+          const isBlocked = blockedDates.includes(iso)
+          const isDisabled = isPast || isBlocked
           const isSelected = selected === iso
           const isToday = toISO(cellDate) === toISO(today)
 
@@ -107,12 +110,13 @@ export default function DeliveryCalendar({ selected, onSelect, selectedSlot }: P
             <button
               key={iso}
               type="button"
-              disabled={isPast}
+              disabled={isDisabled}
+              title={isBlocked ? 'Livraison indisponible ce jour-là' : undefined}
               onClick={() => onSelect(iso)}
               className={cn(
                 'relative flex h-9 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150',
-                isPast
-                  ? 'text-muted/30 cursor-not-allowed'
+                isDisabled
+                  ? cn('cursor-not-allowed', isBlocked ? 'text-red-400/50 line-through' : 'text-muted/30')
                   : isSelected
                     ? 'bg-ink text-surface shadow-sm scale-105'
                     : 'hover:bg-surface-alt text-ink active:scale-95',

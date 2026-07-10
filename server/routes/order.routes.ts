@@ -101,6 +101,11 @@ router.post('/', optionalAuth, async (req, res) => {
     })
   }
 
+  if (data.deliveryDate) {
+    const blocked = await prisma.blockedDate.findUnique({ where: { date: data.deliveryDate } })
+    if (blocked) return res.status(400).json({ error: 'DATE_BLOCKED' })
+  }
+
   const fee = await computeDeliveryFee({
     durationMin: data.deliveryDurationMin,
     subtotal,

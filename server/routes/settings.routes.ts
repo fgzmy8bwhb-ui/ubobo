@@ -116,4 +116,32 @@ router.delete('/zones/:id', requireAdmin, async (req, res) => {
   res.status(204).end()
 })
 
+// ---- BlockedDate CRUD ----
+// GET public (checkout needs to know which dates to disable)
+router.get('/blocked-dates', async (_req, res) => {
+  const dates = await prisma.blockedDate.findMany({ orderBy: { date: 'asc' } })
+  res.json({ dates })
+})
+
+const blockedDateSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  reason: z.string().optional(),
+})
+
+router.post('/blocked-dates', requireAdmin, async (req, res) => {
+  const parsed = blockedDateSchema.safeParse(req.body)
+  if (!parsed.success) return res.status(400).json({ error: 'INVALID_INPUT' })
+  const date = await prisma.blockedDate.upsert({
+    where: { date: parsed.data.date },
+    create: parsed.data,
+    update: { reason: parsed.data.reason ?? null },
+  })
+  res.status(201).json({ date })
+})
+
+router.delete('/blocked-dates/:date', requireAdmin, async (req, res) => {
+  await prisma.blockedDate.deleteMany({ where: { date: req.params.date } })
+  res.status(204).end()
+})
+
 export default router

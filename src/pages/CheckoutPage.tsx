@@ -64,6 +64,20 @@ export default function CheckoutPage() {
       .then((r) => setTakenSlots(r.slots))
       .catch(() => setTakenSlots([]))
   }, [deliveryDate])
+
+  const [blockedDates, setBlockedDates] = useState<string[]>([])
+  useEffect(() => {
+    api.settings.blockedDates()
+      .then((r) => setBlockedDates(r.dates.map((d) => d.date)))
+      .catch(() => setBlockedDates([]))
+  }, [])
+  // Si la date déjà sélectionnée vient d'être bloquée (ex: admin ferme le jour pendant que le client est sur la page)
+  useEffect(() => {
+    if (deliveryDate && blockedDates.includes(deliveryDate)) {
+      setDeliveryDate(null)
+      useCartStore.getState().setDeliverySlot(null)
+    }
+  }, [blockedDates, deliveryDate])
   const restaurantId = useCartStore((s) => s.restaurantId)
   const isBakery = restaurantId === 'boulangerie-du-cap'
   const isAuchan = restaurantId === 'auchan-lege'
@@ -152,6 +166,10 @@ export default function CheckoutPage() {
       setError(t('checkout.belowMinOrder', { amount: formatPrice(settings?.deliveryMinOrder ?? 0, i18n.language) }))
     } else if (code === 'ORDERS_PAUSED') {
       setError('Les commandes sont temporairement suspendues.')
+    } else if (code === 'DATE_BLOCKED') {
+      setError('La livraison n\'est pas disponible ce jour-là. Merci de choisir une autre date.')
+      setDeliveryDate(null)
+      useCartStore.getState().setDeliverySlot(null)
     } else if (code === 'STRIPE_NOT_CONFIGURED' || code === 'SUMUP_NOT_CONFIGURED') {
       setError('Le paiement par carte n\'est pas encore disponible. Veuillez choisir le paiement en espèces.')
     } else if (code === 'NO_RESTAURANT' || code === 'RESTAURANT_NOT_FOUND' || code === 'EMPTY_CART') {
@@ -207,7 +225,7 @@ export default function CheckoutPage() {
           })
         } catch (e: any) {
           const code = e?.message
-          const isDefinitive = ['BELOW_MIN_ORDER', 'ORDERS_PAUSED', 'NO_RESTAURANT', 'RESTAURANT_NOT_FOUND', 'EMPTY_CART'].includes(code)
+          const isDefinitive = ['BELOW_MIN_ORDER', 'ORDERS_PAUSED', 'DATE_BLOCKED', 'NO_RESTAURANT', 'RESTAURANT_NOT_FOUND', 'EMPTY_CART'].includes(code)
           if (isDefinitive || attempt === MAX_ATTEMPTS) {
             handleOrderError(e)
             orderCreationRef.current = false
@@ -376,6 +394,7 @@ export default function CheckoutPage() {
                     selected={effectiveDate}
                     onSelect={(d) => { if (!orderPlaced) { setDeliveryDate(d); useCartStore.getState().setDeliverySlot(null) } }}
                     selectedSlot={effectiveSlot}
+                    blockedDates={blockedDates}
                   />
                 </div>
 
