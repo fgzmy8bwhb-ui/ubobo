@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowRight, Minus, Plus, ShoppingBag, Tag, Trash2, X } from 'lucide-react'
 import useCartStore from '@/store/cart.store'
+import { useSettings } from '@/hooks/useSettings'
 import { formatPrice } from '@/lib/format'
 import { toast } from '@/hooks/useToast'
 import Button from '@/components/ui/Button'
@@ -22,9 +23,12 @@ export default function CartPage() {
   const deliveryFee = useCartStore((s) => s.deliveryFee())
   const pickingFee = useCartStore((s) => s.pickingFee())
   const discount = useCartStore((s) => s.discount())
+  const settings = useSettings((s) => s.settings)
+  const isSpecialOffer = (settings?.deliveryPerKmFee ?? 0.5) === 0
   // Tant que l'adresse n'est pas connue, le vrai trajet n'est pas calculé —
-  // on n'affiche donc pas d'estimation de livraison avant l'étape commande.
-  const total = useCartStore((s) => s.total()) - (serverFee === null ? deliveryFee : 0)
+  // on n'affiche donc pas d'estimation de livraison avant l'étape commande,
+  // sauf en offre spéciale où le tarif est fixe (indépendant du trajet).
+  const total = useCartStore((s) => s.total()) - (serverFee === null && !isSpecialOffer ? deliveryFee : 0)
   const appliedPromo = useCartStore((s) => s.appliedPromo)
   const applyPromo = useCartStore((s) => s.applyPromo)
   const clearPromo = useCartStore((s) => s.clearPromo)
@@ -127,26 +131,37 @@ export default function CartPage() {
           </div>
 
           <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-muted">{t('cart.subtotal')}</dt>
-              <dd className="font-semibold">{formatPrice(subtotal, i18n.language)}</dd>
-            </div>
+            {!isSpecialOffer && (
+              <div className="flex justify-between">
+                <dt className="text-muted">{t('cart.subtotal')}</dt>
+                <dd className="font-semibold">{formatPrice(subtotal, i18n.language)}</dd>
+              </div>
+            )}
             {discount > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <dt>{t('cart.discount')}</dt>
                 <dd className="font-semibold">− {formatPrice(discount, i18n.language)}</dd>
               </div>
             )}
-            <div className="flex justify-between">
-              <dt className="text-muted">Livraison (trajet)</dt>
-              <dd className="font-semibold text-muted">
-                {serverFee === null ? 'Calculé à l\'étape suivante' : formatPrice(deliveryFee, i18n.language)}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">Commission <span className="text-[10px] font-normal">(15 %)</span></dt>
-              <dd className="font-semibold">{formatPrice(pickingFee, i18n.language)}</dd>
-            </div>
+            {isSpecialOffer ? (
+              <div className="flex justify-between">
+                <dt className="text-muted">Livraison <span className="text-emerald-600 dark:text-emerald-400">— offre spéciale</span></dt>
+                <dd className="font-semibold">{formatPrice(deliveryFee, i18n.language)}</dd>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <dt className="text-muted">Livraison (trajet)</dt>
+                  <dd className="font-semibold text-muted">
+                    {serverFee === null ? 'Calculé à l\'étape suivante' : formatPrice(deliveryFee, i18n.language)}
+                  </dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted">Commission <span className="text-[10px] font-normal">(15 %)</span></dt>
+                  <dd className="font-semibold">{formatPrice(pickingFee, i18n.language)}</dd>
+                </div>
+              </>
+            )}
             <div className="flex justify-between border-t border-line pt-3 text-base">
               <dt className="font-bold">{t('cart.total')}</dt>
               <dd className="font-bold">{formatPrice(total, i18n.language)}</dd>
