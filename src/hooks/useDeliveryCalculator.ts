@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useSettings } from '@/hooks/useSettings'
 
 interface Coords { lat: number; lng: number }
@@ -70,8 +70,8 @@ export function useDeliveryCalculator(
   _restaurantCoords: Coords | undefined,
   customerAddress: string,
 ): DeliveryResult {
-  const [result, setResult] = useState<DeliveryResult>({
-    deliveryFee: null, distanceKm: null, durationMin: null, loading: false, error: null,
+  const [route, setRoute] = useState<{ distanceKm: number | null; durationMin: number | null; loading: boolean; error: string | null }>({
+    distanceKm: null, durationMin: null, loading: false, error: null,
   })
 
   const prevAddress = useRef('')
@@ -85,7 +85,7 @@ export function useDeliveryCalculator(
     prevAddress.current = customerAddress
     cancelRef.current = false
 
-    setResult({ deliveryFee: null, distanceKm: null, durationMin: null, loading: true, error: null })
+    setRoute({ distanceKm: null, durationMin: null, loading: true, error: null })
 
     ;(async () => {
       try {
@@ -93,24 +93,29 @@ export function useDeliveryCalculator(
         if (cancelRef.current) return
 
         if (!isInPeninsula(clientPos)) {
-          setResult({ deliveryFee: null, distanceKm: null, durationMin: null, loading: false, error: 'out_of_zone' })
+          setRoute({ distanceKm: null, durationMin: null, loading: false, error: 'out_of_zone' })
           return
         }
 
         const { distanceKm, durationMin } = await routeFromPhare(clientPos)
         if (cancelRef.current) return
 
-        const deliveryFee = Math.round((baseFee + durationMin * ratePerMin) * 100) / 100
-
-        setResult({ deliveryFee, distanceKm, durationMin, loading: false, error: null })
+        setRoute({ distanceKm, durationMin, loading: false, error: null })
       } catch (err: any) {
         if (!cancelRef.current)
-          setResult({ deliveryFee: null, distanceKm: null, durationMin: null, loading: false, error: err.message })
+          setRoute({ distanceKm: null, durationMin: null, loading: false, error: err.message })
       }
     })()
 
     return () => { cancelRef.current = true }
   }, [customerAddress])
 
-  return result
+  // Recalculé à chaque changement de tarif (ex: offre spéciale activée/désactivée en admin),
+  // sans re-géocoder ni recalculer l'itinéraire.
+  const deliveryFee = useMemo(() => {
+    if (route.durationMin === null) return null
+    return Math.round((baseFee + route.durationMin * ratePerMin) * 100) / 100
+  }, [route.durationMin, baseFee, ratePerMin])
+
+  return { ...route, deliveryFee }
 }
