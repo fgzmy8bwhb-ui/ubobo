@@ -1,23 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link, useParams, Navigate } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Plus, Minus, ShoppingCart, Search } from 'lucide-react'
-import { COURSES_CATEGORIES } from '@/data/courses-categories'
 import { request } from '@/lib/api'
 import useCartStore from '@/store/cart.store'
-import Seo from '@/components/shared/Seo'
-
-// Cache of known Auchan slugs loaded once from API
-let _auchanSlugsCache: Set<string> | null = null
-async function getAuchanSlugs(): Promise<Set<string>> {
-  if (_auchanSlugsCache) return _auchanSlugsCache
-  try {
-    const r = await request<{ categories: { slug: string }[] }>('/api/courses/nav')
-    _auchanSlugsCache = new Set(r.categories.map((c) => c.slug))
-  } catch {
-    _auchanSlugsCache = new Set()
-  }
-  return _auchanSlugsCache
-}
 
 interface AuchanProduct {
   productId: string
@@ -36,104 +21,42 @@ interface ApiResponse {
   products: AuchanProduct[]
 }
 
-// Static pages with sub-categories (not direct Auchan product lists)
-const STATIC_SLUGS = new Set(['halles'])
+export default function CoursesSearchPage() {
+  const [params, setParams] = useSearchParams()
+  const initialQ = params.get('q') ?? ''
 
-export default function CoursesCategoryPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const [isAuchan, setIsAuchan] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    if (!slug) return
-    if (STATIC_SLUGS.has(slug)) { setIsAuchan(false); return }
-    getAuchanSlugs().then((s) => setIsAuchan(s.has(slug) || !COURSES_CATEGORIES[slug]))
-  }, [slug])
-
-  if (!slug) return <Navigate to="/courses" replace />
-
-  // While resolving, show loading
-  if (isAuchan === null) return <div className="flex items-center justify-center h-64"><div className="animate-spin h-8 w-8 rounded-full border-4 border-emerald-400 border-t-transparent" /></div>
-
-  if (isAuchan) return <AuchanProductList slug={slug} />
-
-  const data = COURSES_CATEGORIES[slug]
-  if (!data) return <Navigate to="/courses" replace />
-
-  return (
-    <main className="pb-16">
-      <Seo
-        title={`${data.title} — Courses Cap Ferret | UBOBO`}
-        description={`${data.title}, livrés sur la Pointe du Cap Ferret.`}
-        path={`/courses/categorie/${slug}`}
-        image={data.image}
-      />
-      <div className="bg-gradient-to-br from-emerald-400 to-teal-500 px-4 pt-6 pb-8">
-        <div className="mx-auto max-w-2xl">
-          <Link to="/courses" className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
-            <ArrowLeft size={15} /> Retour aux courses
-          </Link>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="h-16 w-16 overflow-hidden rounded-2xl border-2 border-white/30 shadow-lg shrink-0">
-              <img src={data.image} alt={data.title} className="h-full w-full object-cover" />
-            </div>
-            <h1 className="text-3xl font-black text-white drop-shadow">{data.title}</h1>
-          </div>
-        </div>
-      </div>
-      <section className="container-edge pt-6">
-        <div className="mx-auto max-w-2xl divide-y divide-line rounded-3xl border border-line bg-card overflow-hidden">
-          {data.subcategories.map((sub) => (
-            <Link key={sub.slug} to={`/courses/categorie/${slug}/${sub.slug}`}
-              className="flex items-center gap-5 px-5 py-4 transition-colors hover:bg-surface-alt active:bg-surface-alt">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-surface-alt">
-                <img src={sub.image} alt={sub.label} className="h-full w-full object-contain p-1" loading="lazy" />
-              </div>
-              <span className="flex-1 text-base font-semibold text-ink">{sub.label}</span>
-              <svg className="h-4 w-4 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          ))}
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function AuchanProductList({ slug }: { slug: string }) {
-  const [label, setLabel] = useState(slug)
-  useEffect(() => {
-    request<{ categories: { slug: string; name: string }[] }>('/api/courses/nav')
-      .then((r) => { const c = r.categories.find((x) => x.slug === slug); if (c) setLabel(c.name) })
-      .catch(() => {})
-  }, [slug])
+  const [q, setQ] = useState(initialQ)
+  const [search, setSearch] = useState(initialQ)
   const [products, setProducts] = useState<AuchanProduct[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [q, setQ] = useState('')
-  const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const LIMIT = 40
 
   const load = useCallback(async (p: number, query: string) => {
+    if (!query) {
+      setProducts([])
+      setTotal(0)
+      return
+    }
     setLoading(true)
     try {
-      const params = new URLSearchParams({ page: String(p), limit: String(LIMIT) })
-      if (query) params.set('q', query)
-      const data = await request<ApiResponse>(`/api/courses/${slug}?${params}`)
+      const paramsQ = new URLSearchParams({ page: String(p), limit: String(LIMIT), q: query })
+      const data = await request<ApiResponse>(`/api/courses/search?${paramsQ}`)
       setProducts(data.products)
       setTotal(data.total)
     } finally {
       setLoading(false)
     }
-  }, [slug])
+  }, [])
 
-  useEffect(() => { load(1, '') }, [load])
+  useEffect(() => { load(1, initialQ) }, [])
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     setPage(1)
     setSearch(q)
+    setParams(q ? { q } : {})
     load(1, q)
   }
 
@@ -147,19 +70,14 @@ function AuchanProductList({ slug }: { slug: string }) {
 
   return (
     <main className="pb-16">
-      <Seo
-        title={`${label} — Courses Cap Ferret | UBOBO`}
-        description={`${label} disponibles à l'Auchan de Lège, livrés sur la Pointe du Cap Ferret.`}
-        path={`/courses/categorie/${slug}`}
-      />
       <div className="bg-gradient-to-br from-emerald-400 to-teal-500 px-4 pt-6 pb-8">
         <div className="mx-auto max-w-3xl">
           <Link to="/courses" className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
-            <ArrowLeft size={15} /> Retour aux courses
+            <ArrowLeft size={15} /> Retour aux rayons
           </Link>
           <div className="mt-2">
-            <h1 className="text-3xl font-black text-white drop-shadow">{label}</h1>
-            <p className="mt-1 text-white/80">{total} produit{total > 1 ? 's' : ''} disponibles</p>
+            <h1 className="text-3xl font-black text-white drop-shadow">Rechercher un produit</h1>
+            <p className="mt-1 text-white/80">Tous les rayons Auchan, en une seule recherche</p>
           </div>
         </div>
       </div>
@@ -170,9 +88,10 @@ function AuchanProductList({ slug }: { slug: string }) {
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
+              autoFocus
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Rechercher un produit…"
+              placeholder="Rechercher un produit, une marque…"
               className="w-full rounded-xl border border-line bg-card pl-9 pr-4 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
@@ -190,10 +109,13 @@ function AuchanProductList({ slug }: { slug: string }) {
               <div key={i} className="h-64 rounded-2xl bg-surface-alt animate-pulse" />
             ))}
           </div>
+        ) : !search ? (
+          <div className="py-16 text-center text-muted">Tapez un mot-clé pour chercher dans tous les rayons.</div>
         ) : products.length === 0 ? (
-          <div className="py-16 text-center text-muted">Aucun produit trouvé.</div>
+          <div className="py-16 text-center text-muted">Aucun produit trouvé pour « {search} ».</div>
         ) : (
           <>
+            <p className="mb-3 text-sm text-muted">{total} résultat{total > 1 ? 's' : ''} pour « {search} »</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
               {products.map((p) => <ProductCard key={p.productId} product={p} />)}
             </div>

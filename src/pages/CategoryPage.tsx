@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, MapPin } from 'lucide-react'
 import { useRestaurants } from '@/hooks/useRestaurants'
 import type { Restaurant } from '@/types'
+import Seo from '@/components/shared/Seo'
 
 const CATEGORY_META: Record<string, { name: string; gradient: string; description: string }> = {
   'petit-dejeuner': {
@@ -52,6 +53,11 @@ export default function CategoryPage() {
 
   return (
     <main className="pb-16">
+      <Seo
+        title={`${meta.name} — Livraison Cap Ferret | UBOBO`}
+        description={`${meta.description}, livrés sur la Pointe du Cap Ferret.`}
+        path={`/categorie/${slug}`}
+      />
       {/* Header */}
       <div className={`bg-gradient-to-br ${meta.gradient} px-4 pt-6 pb-8`}>
         <div className="mx-auto max-w-3xl">

@@ -23,6 +23,44 @@ router.get('/categories', async (_req, res) => {
   res.json({ slugs: dbCats.map((c) => c.slug) })
 })
 
+// GET /api/courses/search?q=search&page=1&limit=40 — search across ALL categories
+router.get('/search', async (req, res) => {
+  const q = (req.query.q as string | undefined)?.trim()
+  if (!q) {
+    res.json({ total: 0, page: 1, limit: 40, products: [] })
+    return
+  }
+
+  const page = Math.max(1, Number(req.query.page) || 1)
+  const limit = Math.min(100, Number(req.query.limit) || 40)
+
+  const where = {
+    disabled: false,
+    name: { contains: q },
+  }
+
+  const [total, products] = await Promise.all([
+    prisma.auchanProduct.count({ where }),
+    prisma.auchanProduct.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { name: 'asc' },
+      select: {
+        productId: true,
+        name: true,
+        brand: true,
+        price: true,
+        weightVolume: true,
+        imageUrl: true,
+        category: true,
+      },
+    }),
+  ])
+
+  res.json({ total, page, limit, products })
+})
+
 // GET /api/courses/:slug?page=1&limit=40&q=search
 // :slug is the Auchan category slug stored in DB (e.g. "fruits-legumes")
 router.get('/:slug', async (req, res) => {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useSettings } from '@/hooks/useSettings'
 
 interface Coords { lat: number; lng: number }
 
@@ -10,16 +11,13 @@ export interface DeliveryResult {
   error: string | null
 }
 
-const BASE_FEE = 3.00
-const RATE_PER_MIN = 0.50
-
 // Point de départ fixe : Phare du Cap Ferret
 const PHARE_CAP_FERRET: Coords = { lat: 44.6358, lng: -1.2510 }
 
-// Bounding box presqu'île jusqu'à L'Herbe / Le Canon
+// Bounding box presqu'île jusqu'à Piraillan
 const PENINSULA_BBOX = {
   minLat: 44.620,
-  maxLat: 44.682,
+  maxLat: 44.712,
   minLng: -1.300,
   maxLng: -1.200,
 }
@@ -78,6 +76,8 @@ export function useDeliveryCalculator(
 
   const prevAddress = useRef('')
   const cancelRef = useRef(false)
+  const baseFee = useSettings((s) => s.settings?.deliveryBaseFee ?? 3)
+  const ratePerMin = useSettings((s) => s.settings?.deliveryPerKmFee ?? 0.5)
 
   useEffect(() => {
     if (!customerAddress || customerAddress.trim().length < 8) return
@@ -100,7 +100,7 @@ export function useDeliveryCalculator(
         const { distanceKm, durationMin } = await routeFromPhare(clientPos)
         if (cancelRef.current) return
 
-        const deliveryFee = Math.round((BASE_FEE + durationMin * RATE_PER_MIN) * 100) / 100
+        const deliveryFee = Math.round((baseFee + durationMin * ratePerMin) * 100) / 100
 
         setResult({ deliveryFee, distanceKm, durationMin, loading: false, error: null })
       } catch (err: any) {

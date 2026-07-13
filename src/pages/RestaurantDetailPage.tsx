@@ -13,6 +13,7 @@ import type { MenuItem } from '@/types'
 import FavoriteButton from '@/components/customer/FavoriteButton'
 import ReviewStars from '@/components/customer/ReviewStars'
 import { cn } from '@/lib/cn'
+import Seo from '@/components/shared/Seo'
 
 function ConflictModal({
   currentRestaurantName, newRestaurantName, onConfirm, onCancel,
@@ -233,6 +234,12 @@ export default function RestaurantDetailPage() {
 
   return (
     <>
+      <Seo
+        title={`${restaurant.name} — Livraison Cap Ferret | UBOBO`}
+        description={restaurant.description || `Commandez chez ${restaurant.name} et faites-vous livrer sur la Pointe du Cap Ferret.`}
+        path={`/restaurant/${restaurant.id}`}
+        image={restaurant.coverImage || restaurant.logo}
+      />
       <main className="pb-24">
         {/* Hero — image + info */}
         <section className="relative">

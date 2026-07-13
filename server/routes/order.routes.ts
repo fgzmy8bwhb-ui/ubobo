@@ -155,7 +155,8 @@ router.post('/', optionalAuth, async (req, res) => {
     }
   }
 
-  const serviceFee = calculateServiceFee(restaurant.slug, subtotal)
+  // Offre spéciale livraison flat (perMinFee = 0) : pas de frais de service
+  const serviceFee = fee.perMinFee === 0 ? 0 : calculateServiceFee(restaurant.slug, subtotal)
   const total = Math.max(0, subtotal + appliedDeliveryFee + serviceFee - discount)
   const orderNumber = generateOrderNumber()
 

@@ -103,6 +103,8 @@ export default function CheckoutPage() {
     if (dynamicFee !== null) setServerFee(dynamicFee)
   }, [dynamicFee, setServerFee])
 
+  const isSpecialOffer = (settings?.deliveryPerKmFee ?? 0.5) === 0
+
   const CASH_MAX = 30
   const [payment, setPayment] = useState<'card' | 'cash' | 'card_on_delivery'>('card')
   const cashDisabled = total > CASH_MAX
@@ -679,7 +681,7 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {!frozenOrder && distanceKm !== null && !deliveryLoading && (
+              {!frozenOrder && distanceKm !== null && !deliveryLoading && !isSpecialOffer && (
                 <div className="rounded-lg bg-surface-alt px-3 py-2.5 text-xs space-y-1 text-muted">
                   <div className="flex justify-between">
                     <span>Distance du trajet</span>
@@ -690,14 +692,18 @@ export default function CheckoutPage() {
                     <span className="font-medium text-ink">~{durationMin} min</span>
                   </div>
                   <div className="flex justify-between pt-0.5 border-t border-line">
-                    <span>Frais de livraison <span className="opacity-70">(3,00 € + {durationMin} min × 0,50 €)</span></span>
-                    <span className="font-medium text-ink">{formatPrice(3 + (durationMin ?? 0) * 0.5, i18n.language)}</span>
+                    <span>Frais de livraison <span className="opacity-70">({formatPrice(settings?.deliveryBaseFee ?? 3, i18n.language)} + {durationMin} min × {formatPrice(settings?.deliveryPerKmFee ?? 0.5, i18n.language)})</span></span>
+                    <span className="font-medium text-ink">{formatPrice(deliveryFee, i18n.language)}</span>
                   </div>
                 </div>
               )}
 
               <div className="flex justify-between">
-                <dt className="text-muted">Livraison{!frozenOrder && usePoints && canUsePoints && <span className="text-emerald-600 dark:text-emerald-400"> (offerte)</span>}</dt>
+                <dt className="text-muted">
+                  Livraison
+                  {!frozenOrder && isSpecialOffer && !(usePoints && canUsePoints) && <span className="text-emerald-600 dark:text-emerald-400"> — offre spéciale</span>}
+                  {!frozenOrder && usePoints && canUsePoints && <span className="text-emerald-600 dark:text-emerald-400"> (offerte)</span>}
+                </dt>
                 <dd>
                   {!frozenOrder && deliveryLoading
                     ? <span className="text-muted text-xs">…</span>
@@ -705,12 +711,14 @@ export default function CheckoutPage() {
                 </dd>
               </div>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">
-                {isAuchan ? <>Commission <span className="text-[10px]">(15 %)</span></> : 'Frais de service'}
-              </dt>
-              <dd>{formatPrice(frozenOrder?.serviceFee ?? pickingFee, i18n.language)}</dd>
-            </div>
+            {!isSpecialOffer && (
+              <div className="flex justify-between">
+                <dt className="text-muted">
+                  {isAuchan ? <>Commission <span className="text-[10px]">(15 %)</span></> : 'Frais de service'}
+                </dt>
+                <dd>{formatPrice(frozenOrder?.serviceFee ?? pickingFee, i18n.language)}</dd>
+              </div>
+            )}
             <div className="flex justify-between border-t border-line pt-2 text-base font-bold">
               <dt>{t('cart.total')}</dt>
               <dd>{formatPrice(frozenOrder?.total ?? (usePoints && canUsePoints ? total - deliveryFee : total), i18n.language)}</dd>

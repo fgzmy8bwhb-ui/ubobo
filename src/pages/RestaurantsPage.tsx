@@ -5,6 +5,7 @@ import { useRestaurants } from '@/hooks/useRestaurants'
 import RestaurantCard from '@/components/RestaurantCard'
 import { CATEGORIES } from '@/components/customer/CategoryStrip'
 import type { Restaurant } from '@/types'
+import Seo from '@/components/shared/Seo'
 
 export default function RestaurantsPage() {
   const { t } = useTranslation()
@@ -34,6 +35,11 @@ export default function RestaurantsPage() {
 
   return (
     <main className="pb-12">
+      <Seo
+        title="Restaurants & commerces — Livraison Cap Ferret | UBOBO"
+        description="Découvrez tous les restaurants et commerces livrés par UBOBO sur la Pointe du Cap Ferret."
+        path="/restaurants"
+      />
       <section className="container-edge pt-6">
         <h1 className="text-display">{t('Commerces locaux')}</h1>
         <p className="mt-1 text-sm text-muted">

@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { CartItem, MenuItem } from '@/types'
-import { calculateDeliveryFee, calculatePickingFee } from '@/lib/delivery'
+import { calculatePickingFee } from '@/lib/delivery'
 import { api, type ApiOrder } from '@/lib/api'
+import { useSettings } from '@/hooks/useSettings'
 
 export type PaymentMethod = 'card' | 'cash' | 'card_on_delivery'
 
@@ -218,10 +219,13 @@ const useCartStore = create<CartStore>()(
         if (s.appliedPromo?.freeDelivery) return 0
         // Utilise le frais calculé dynamiquement par useDeliveryCalculator si disponible
         if (s.serverFee !== null) return s.serverFee
-        return calculateDeliveryFee()
+        const settings = useSettings.getState().settings
+        return settings?.deliveryBaseFee ?? 3
       },
       pickingFee: () => {
         const s = get()
+        // Offre spéciale livraison flat : pas de frais de service
+        if ((useSettings.getState().settings?.deliveryPerKmFee ?? 0.5) === 0) return 0
         const subtotal = s.subtotal()
         // Commission 15% uniquement sur les courses Auchan
         if (s.restaurantId === 'auchan-lege') {

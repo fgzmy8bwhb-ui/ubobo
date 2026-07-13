@@ -62,7 +62,7 @@ export default function AddressBar() {
             />
 
             <p className="mt-3 text-xs text-muted">
-              Nous livrons sur Cap Ferret.
+              Nous livrons du village du Cap Ferret jusqu'à Piraillan.
             </p>
 
             {/* Bouton confirmer */}

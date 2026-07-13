@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Sparkles, ArrowRight } from 'lucide-react'
 import AddressBar from '@/components/customer/AddressBar'
+import Seo from '@/components/shared/Seo'
 
 interface CategoryTile {
   slug: string
@@ -78,12 +79,17 @@ const TILES: CategoryTile[] = [
 export default function HomePage() {
   return (
     <main className="pb-16">
+      <Seo
+        title="UBOBO — Livraison Cap Ferret"
+        description="Livraison locale de la Pointe du Cap Ferret jusqu'à Piraillan. Restaurants, courses, livraison rapide."
+        path="/"
+      />
       {/* Hero */}
       <section className="container-edge pt-6 pb-6 md:pt-10">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="inline-flex items-center gap-1.5 rounded-full bg-ocean-50 px-3 py-1 text-xs font-bold text-ocean-700 dark:bg-ocean-900/40 dark:text-ocean-200">
-              <Sparkles size={12} /> Cap Ferret · Pointe du Cap
+              <Sparkles size={12} /> De la Pointe jusqu'à Piraillan
             </p>
             <h1 className="mt-3 text-hero">
               Livraison à domicile<br />
@@ -113,7 +119,7 @@ export default function HomePage() {
       <section className="container-edge mt-10">
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { title: 'Zone de livraison', text: 'Cap Ferret uniquement — Pointe, village, plages océan & bassin' },
+            { title: 'Zone de livraison', text: 'Du village du Cap Ferret jusqu\'à Piraillan — Pointe, plages océan & bassin' },
             { title: 'Paiement sécurisé', text: 'CB, Apple Pay, Google Pay ou espèces à la livraison' },
           ].map((item) => (
             <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-line bg-card p-4">

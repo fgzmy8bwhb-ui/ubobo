@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { request } from '@/lib/api'
 import { AUCHAN_ICON_BY_SLUG } from '@/data/courses-categories'
+import Seo from '@/components/shared/Seo'
 
 interface AuchanNavCategory {
   slug: string
@@ -15,9 +16,17 @@ interface AuchanNavCategory {
 const HALLES_SLUG = 'les-halles-d-auchan'
 
 export default function CoursesPage() {
+  const navigate = useNavigate()
+  const [q, setQ] = useState('')
   const [cats, setCats] = useState<AuchanNavCategory[]>([])
   const [availableSlugs, setAvailableSlugs] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    if (!q.trim()) return
+    navigate(`/courses/recherche?q=${encodeURIComponent(q.trim())}`)
+  }
 
   useEffect(() => {
     Promise.all([
@@ -34,6 +43,11 @@ export default function CoursesPage() {
 
   return (
     <main className="pb-16">
+      <Seo
+        title="Courses Auchan — Livraison Cap Ferret | UBOBO"
+        description="Faites vos courses à l'Auchan de Lège et faites-vous livrer sur la Pointe du Cap Ferret."
+        path="/courses"
+      />
       {/* Header */}
       <div className="bg-gradient-to-br from-emerald-400 to-teal-500 px-4 pt-6 pb-8">
         <div className="mx-auto max-w-3xl">
@@ -80,6 +94,24 @@ export default function CoursesPage() {
           </div>
         )}
       </section>
+
+      {/* Search across all categories */}
+      <div className="container-edge pt-6">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Rechercher un produit dans tous les rayons…"
+              className="w-full rounded-xl border border-line bg-card pl-9 pr-4 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            />
+          </div>
+          <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-surface hover:opacity-80 transition-opacity">
+            Chercher
+          </button>
+        </form>
+      </div>
     </main>
   )
 }
