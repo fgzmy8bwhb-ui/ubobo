@@ -642,10 +642,12 @@ export default function CheckoutPage() {
             ))}
           </ul>
           <dl className="mt-4 space-y-1.5 border-t border-line pt-4 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-muted">{t('cart.subtotal')}</dt>
-              <dd>{formatPrice(frozenOrder?.subtotal ?? subtotal, i18n.language)}</dd>
-            </div>
+            {!isSpecialOffer && (
+              <div className="flex justify-between">
+                <dt className="text-muted">{t('cart.subtotal')}</dt>
+                <dd>{formatPrice(frozenOrder?.subtotal ?? subtotal, i18n.language)}</dd>
+              </div>
+            )}
             {appliedPromo && (frozenOrder?.discount ?? discount) > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <dt>{t('cart.discount')} ({appliedPromo.code})</dt>
