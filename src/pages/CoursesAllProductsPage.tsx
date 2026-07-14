@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Plus, Minus, ShoppingCart } from 'lucide-react'
 import { request } from '@/lib/api'
@@ -17,39 +17,23 @@ interface AuchanProduct {
 
 interface ApiResponse {
   total: number
-  page: number
-  limit: number
   products: AuchanProduct[]
 }
 
 export default function CoursesAllProductsPage() {
   const [products, setProducts] = useState<AuchanProduct[]>([])
   const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
-  const LIMIT = 40
 
-  const load = useCallback(async (p: number) => {
+  useEffect(() => {
     setLoading(true)
-    try {
-      const params = new URLSearchParams({ page: String(p), limit: String(LIMIT) })
-      const data = await request<ApiResponse>(`/api/courses/all?${params}`)
-      setProducts(data.products)
-      setTotal(data.total)
-    } finally {
-      setLoading(false)
-    }
+    request<ApiResponse>('/api/courses/all')
+      .then((data) => {
+        setProducts(data.products)
+        setTotal(data.total)
+      })
+      .finally(() => setLoading(false))
   }, [])
-
-  useEffect(() => { load(1) }, [load])
-
-  function goPage(p: number) {
-    setPage(p)
-    load(p)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const totalPages = Math.ceil(total / LIMIT)
 
   return (
     <main className="pb-16">
@@ -80,24 +64,9 @@ export default function CoursesAllProductsPage() {
         ) : products.length === 0 ? (
           <div className="py-16 text-center text-muted">Aucun produit trouvé.</div>
         ) : (
-          <>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-              {products.map((p) => <ProductCard key={p.productId} product={p} />)}
-            </div>
-            {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
-                <button onClick={() => goPage(page - 1)} disabled={page === 1}
-                  className="rounded-lg border border-line bg-card px-3 py-1.5 text-sm font-semibold text-ink disabled:opacity-40 hover:bg-surface-alt transition-colors">
-                  ← Précédent
-                </button>
-                <span className="text-sm text-muted">Page {page} / {totalPages}</span>
-                <button onClick={() => goPage(page + 1)} disabled={page === totalPages}
-                  className="rounded-lg border border-line bg-card px-3 py-1.5 text-sm font-semibold text-ink disabled:opacity-40 hover:bg-surface-alt transition-colors">
-                  Suivant →
-                </button>
-              </div>
-            )}
-          </>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {products.map((p) => <ProductCard key={p.productId} product={p} />)}
+          </div>
         )}
       </section>
     </main>
