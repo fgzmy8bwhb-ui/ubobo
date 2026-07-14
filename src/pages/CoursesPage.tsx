@@ -93,6 +93,14 @@ export default function CoursesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            <Link to="/courses/categorie/tous" className="block">
+              <div className="group relative flex flex-col items-center gap-3 rounded-2xl border border-line bg-card p-4 text-center transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+                <div className="h-16 w-16 overflow-hidden rounded-2xl bg-surface-alt transition-transform duration-200 group-hover:scale-105 flex items-center justify-center text-2xl">
+                  🔎
+                </div>
+                <p className="text-xs font-semibold leading-tight text-ink line-clamp-2">Voir tout</p>
+              </div>
+            </Link>
             {cats.map((cat) => {
               // Les halles → static sub-categories page, always available
               const isHalles = cat.slug === HALLES_SLUG

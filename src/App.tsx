@@ -12,6 +12,7 @@ const RestaurantDetailPage = lazy(() => import('./pages/RestaurantDetailPage'))
 const CoursesPage = lazy(() => import('./pages/CoursesPage'))
 const CoursesCategoryPage = lazy(() => import('./pages/CoursesCategoryPage'))
 const CoursesSearchPage = lazy(() => import('./pages/CoursesSearchPage'))
+const CoursesAllProductsPage = lazy(() => import('./pages/CoursesAllProductsPage'))
 const CoursesProductPage = lazy(() => import('./pages/CoursesProductPage'))
 const CartPage = lazy(() => import('./pages/CartPage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
@@ -48,6 +49,7 @@ function AnimatedRoutes() {
         <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/courses/recherche" element={<CoursesSearchPage />} />
+        <Route path="/courses/categorie/tous" element={<CoursesAllProductsPage />} />
         <Route path="/courses/categorie/:slug" element={<CoursesCategoryPage />} />
         <Route path="/courses/categorie/:category/:subcategory" element={<CoursesProductPage />} />
         <Route path="/recherche" element={<SearchPage />} />
