@@ -98,6 +98,10 @@ export default function HomePage() {
             <p className="mt-2 text-base text-muted md:max-w-md">
               Petit déjeuner, apéro ou courses — livrés directement chez vous.
             </p>
+            <p className="mt-2 text-sm text-muted md:max-w-md">
+              Besoin d'une livraison après Piraillan ? Contactez-nous au{' '}
+              <a href="tel:0621812414" className="font-semibold text-ink hover:underline">06 21 81 24 14</a>.
+            </p>
           </div>
           <div className="md:shrink-0">
             <AddressBar />
@@ -130,10 +134,6 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-center text-sm text-muted">
-          Besoin d'une livraison après Piraillan ? Contactez-nous au{' '}
-          <a href="tel:0621812414" className="font-semibold text-ink hover:underline">06 21 81 24 14</a>.
-        </p>
       </section>
     </main>
   )
