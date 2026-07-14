@@ -64,6 +64,24 @@ export default function CoursesPage() {
         </div>
       </div>
 
+      {/* Search across all categories */}
+      <div className="container-edge pt-6">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Rechercher un produit dans tous les rayons…"
+              className="w-full rounded-xl border border-line bg-card pl-9 pr-4 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            />
+          </div>
+          <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-surface hover:opacity-80 transition-opacity">
+            Chercher
+          </button>
+        </form>
+      </div>
+
       {/* Categories grid */}
       <section className="container-edge pt-6">
         <h2 className="mb-5 text-display">Nos rayons</h2>
@@ -94,24 +112,6 @@ export default function CoursesPage() {
           </div>
         )}
       </section>
-
-      {/* Search across all categories */}
-      <div className="container-edge pt-6">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Rechercher un produit dans tous les rayons…"
-              className="w-full rounded-xl border border-line bg-card pl-9 pr-4 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            />
-          </div>
-          <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-surface hover:opacity-80 transition-opacity">
-            Chercher
-          </button>
-        </form>
-      </div>
     </main>
   )
 }

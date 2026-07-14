@@ -34,9 +34,17 @@ router.get('/search', async (req, res) => {
   const page = Math.max(1, Number(req.query.page) || 1)
   const limit = Math.min(100, Number(req.query.limit) || 40)
 
+  // Recherche insensible à la casse, sur chaque mot du nom OU de la marque
+  // (ex: "lait demi ecreme" doit matcher même si le champ est "Lait Demi-Écrémé").
+  const words = q.split(/\s+/).filter(Boolean)
   const where = {
     disabled: false,
-    name: { contains: q },
+    AND: words.map((word) => ({
+      OR: [
+        { name: { contains: word, mode: 'insensitive' as const } },
+        { brand: { contains: word, mode: 'insensitive' as const } },
+      ],
+    })),
   }
 
   const [total, products] = await Promise.all([
@@ -77,10 +85,20 @@ router.get('/:slug', async (req, res) => {
   const limit = Math.min(100, Number(req.query.limit) || 40)
   const q = (req.query.q as string | undefined)?.trim()
 
+  const words = q ? q.split(/\s+/).filter(Boolean) : []
   const where = {
     category: dbCat.name,
     disabled: false,
-    ...(q ? { name: { contains: q } } : {}),
+    ...(words.length > 0
+      ? {
+          AND: words.map((word) => ({
+            OR: [
+              { name: { contains: word, mode: 'insensitive' as const } },
+              { brand: { contains: word, mode: 'insensitive' as const } },
+            ],
+          })),
+        }
+      : {}),
   }
 
   const [total, products] = await Promise.all([
