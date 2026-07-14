@@ -99,7 +99,7 @@
     "status": {
       "PENDING": "En attente de paiement",
       "PAID": "Payée",
-      "ACCEPTED": "Acceptée par le restaurant",
+      "ACCEPTED": "En cours de traitement",
       "PREPARING": "En préparation",
       "READY": "Prête",
       "ON_THE_WAY": "En cours de livraison",
