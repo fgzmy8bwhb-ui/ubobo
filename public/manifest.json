@@ -1,0 +1,20 @@
+{
+  "name": "UBOBO — Livraison Cap Ferret",
+  "short_name": "UBOBO",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A6E8A",
+  "theme_color": "#0A6E8A",
+  "icons": [
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
