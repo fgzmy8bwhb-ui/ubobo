@@ -1,9 +1,30 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Phone, MapPin, RefreshCw, Calendar } from 'lucide-react'
+import { Phone, MapPin, RefreshCw, Calendar, Bell } from 'lucide-react'
 import { api, type ApiOrder } from '@/lib/api'
 import { formatPrice, formatRelativeTime } from '@/lib/format'
 import { toast } from '@/hooks/useToast'
+
+declare global {
+  interface Window {
+    OneSignalDeferred?: Array<(OneSignal: any) => void>
+  }
+}
+
+// La demande de permission doit être déclenchée par un clic direct : sur iOS Safari,
+// tout `await` avant l'appel casse le lien avec le geste utilisateur et bloque le popup.
+function enablePushNotifications() {
+  window.OneSignalDeferred = window.OneSignalDeferred || []
+  window.OneSignalDeferred.push((OneSignal) => {
+    OneSignal.Notifications.requestPermission()
+      .then((granted: boolean) => {
+        toast[granted ? 'success' : 'error'](
+          granted ? 'Notifications activées' : 'Permission refusée',
+        )
+      })
+      .catch(() => toast.error('Erreur lors de l\'activation des notifications'))
+  })
+}
 
 const ALL_STATUSES = [
   'PENDING',
@@ -74,6 +95,12 @@ export default function AdminOrdersPage() {
               Actualisé {formatRelativeTime(lastRefreshedAt, i18n.language)}
             </span>
           )}
+          <button
+            onClick={enablePushNotifications}
+            className="flex h-9 items-center gap-1.5 rounded-md border border-line bg-card px-3 text-xs font-semibold text-ink hover:bg-surface-alt"
+          >
+            <Bell size={12} /> Activer les notifications
+          </button>
           <button
             onClick={refresh}
             className="flex h-9 items-center gap-1.5 rounded-md border border-line bg-card px-3 text-xs font-semibold text-ink hover:bg-surface-alt"
