@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
 import LanguageSelector from '@/components/shared/LanguageSelector'
+import Toaster from '@/components/shared/Toaster'
 
 const navItems = [
   { to: '/admin', label: 'Tableau de bord', icon: BarChart3, end: true },
@@ -137,6 +138,7 @@ export default function AdminLayout() {
           <Outlet />
         </div>
       </main>
+      <Toaster />
     </div>
   )
 }
