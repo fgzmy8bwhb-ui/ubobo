@@ -14,15 +14,24 @@ declare global {
 // La demande de permission doit être déclenchée par un clic direct : sur iOS Safari,
 // tout `await` avant l'appel casse le lien avec le geste utilisateur et bloque le popup.
 function enablePushNotifications() {
+  let responded = false
+  setTimeout(() => {
+    if (!responded) toast.error('Le SDK de notifications ne répond pas (bloqué par le réseau ?)')
+  }, 5000)
+
   window.OneSignalDeferred = window.OneSignalDeferred || []
   window.OneSignalDeferred.push((OneSignal) => {
     OneSignal.Notifications.requestPermission()
       .then((granted: boolean) => {
+        responded = true
         toast[granted ? 'success' : 'error'](
           granted ? 'Notifications activées' : 'Permission refusée',
         )
       })
-      .catch(() => toast.error('Erreur lors de l\'activation des notifications'))
+      .catch(() => {
+        responded = true
+        toast.error('Erreur lors de l\'activation des notifications')
+      })
   })
 }
 
